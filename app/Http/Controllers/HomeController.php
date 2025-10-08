@@ -47,7 +47,9 @@ class HomeController extends Controller
     {
         $term = $request->get('q', '');
         $type = $request->get('type'); // 'product' | 'service' | null
-        $results = $this->productService->search($term, $type);
+        $categorySlug = $request->get('cat');
+
+        $results = $this->productService->search($term, $type, $categorySlug);
 
         if ($request->wantsJson()) {
             return response()->json([
@@ -72,9 +74,15 @@ class HomeController extends Controller
                 'count' => $results->count(),
                 'term' => $term,
                 'type' => $type,
+                'category' => $categorySlug,
             ]);
         }
 
-        return view('home.search', compact('term', 'results', 'type'));
+        return view('home.search', [
+            'term' => $term,
+            'results' => $results,
+            'type' => $type,
+            'category' => $categorySlug,
+        ]);
     }
 }

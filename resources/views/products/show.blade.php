@@ -61,7 +61,21 @@
                         @endif
                     </div>
                 </div>
+                <div class="pt-2">
+                    <h2 class="font-semibold text-sm mb-2">Partilhar</h2>
+                    <x-share-buttons :url="url()->current()" :title="$product->name" />
+                </div>
             </div>
         </div>
     </x-app-container>
+    @if (isset($related) && $related->isNotEmpty())
+        <x-app-container class="max-w-5xl mt-6">
+            <div class="border-t pt-8 space-y-6">
+                <h2 class="text-lg font-semibold">Outros itens relacionados</h2>
+                <div>
+                    @include('partials.product-grid', ['items' => $related])
+                </div>
+            </div>
+        </x-app-container>
+    @endif
 @endsection

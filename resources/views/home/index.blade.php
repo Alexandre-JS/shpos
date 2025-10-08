@@ -1,9 +1,7 @@
 @extends('layouts.app')
 @section('content')
     <x-app-container class="space-y-10">
-        <div class="mb-6">
-            <x-search-bar live="true" />
-        </div>
+        {{-- Search bar movida para o nav global --}}
 
         <section>
             <h2 class="text-xl font-semibold mb-4">Recentemente Adicionados</h2>

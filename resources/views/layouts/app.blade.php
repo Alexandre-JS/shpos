@@ -11,8 +11,8 @@
 
 <body class="min-h-screen flex flex-col bg-white text-gray-800">
     <nav x-data="{ open: false }" class="bg-white shadow mb-6 border-b">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-4">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center gap-6">
+            <div class="flex items-center gap-4 flex-shrink-0">
                 <button class="md:hidden inline-flex items-center justify-center w-9 h-9 rounded hover:bg-gray-100"
                     aria-label="Menu" @click="open=!open">
                     <svg x-show="!open" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
@@ -28,7 +28,10 @@
                 </button>
                 <a href="{{ route('home') }}" class="font-bold text-lg">Vitrine</a>
             </div>
-            <div class="hidden md:flex items-center gap-4 text-sm font-medium">
+            <div class="flex-1 hidden md:block">
+                <x-search-bar live="true" />
+            </div>
+            <div class="hidden md:flex items-center gap-4 text-sm font-medium flex-shrink-0">
                 @auth
                     <a href="{{ route('dashboard.index') }}" class="hover:text-primary">Dashboard</a>
                     <a href="{{ route('dashboard.products.index') }}" class="hover:text-primary">Meus Produtos</a>
@@ -39,13 +42,15 @@
                     </form>
                 @else
                     <a href="{{ route('login.show') }}" class="hover:text-primary">Login</a>
-                    <a href="{{ route('register.show') }}" class="hover:text-primary">Registrar</a>
                 @endauth
             </div>
         </div>
         <!-- Mobile panel -->
         <div x-show="open" x-transition.origin.top.left x-cloak class="md:hidden border-t bg-white">
-            <div class="px-4 py-4 space-y-4 text-sm">
+            <div class="px-4 pt-4 pb-2">
+                <x-search-bar live="true" />
+            </div>
+            <div class="px-4 pb-4 space-y-4 text-sm">
                 @auth
                     <div class="text-xs uppercase text-gray-400">Área</div>
                     <a href="{{ route('dashboard.index') }}" class="block py-1">Dashboard</a>
@@ -58,7 +63,6 @@
                     </form>
                 @else
                     <a href="{{ route('login.show') }}" class="block py-1">Login</a>
-                    <a href="{{ route('register.show') }}" class="block py-1">Registrar</a>
                 @endauth
             </div>
         </div>

@@ -23,6 +23,30 @@ class ProductController extends Controller
         }
 
         $product->load(['entity', 'category']);
-        return view('products.show', compact('product'));
+
+        $related = Product::with(['entity:id,name,slug', 'category:id,name,slug'])
+            ->active()
+            ->where('id', '!=', $product->id)
+            ->when($product->category_id, fn($q) => $q->where('category_id', $product->category_id))
+            ->when(!$product->category_id, fn($q) => $q->where('type', $product->type))
+            ->orderByDesc('views_count')
+            ->limit(8)
+            ->get();
+
+        // Se não encontrou nada pela categoria (pode ser muito restrito), faz um fallback por tipo.
+        if ($related->isEmpty()) {
+            $related = Product::with(['entity:id,name,slug', 'category:id,name,slug'])
+                ->active()
+                ->where('id', '!=', $product->id)
+                ->where('type', $product->type)
+                ->orderByDesc('views_count')
+                ->limit(8)
+                ->get();
+        }
+
+        return view('products.show', [
+            'product' => $product,
+            'related' => $related,
+        ]);
     }
 }

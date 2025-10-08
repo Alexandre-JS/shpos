@@ -7,6 +7,9 @@
             <p class="text-gray-600">{{ $entity->location_city }} {{ $entity->location_district }}</p>
             <p class="max-w-3xl text-gray-700">{{ $entity->description }}</p>
             <x-contact-buttons :entity="$entity" />
+            <div class="pt-2">
+                <x-share-buttons :url="url()->current()" :title="$entity->name" />
+            </div>
         </header>
 
         <section>

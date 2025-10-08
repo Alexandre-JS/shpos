@@ -7,9 +7,16 @@ use Illuminate\Support\Str;
 <div
     class="group flex flex-col rounded-lg border border-gray-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
     <a href="{{ route('product.show', $product->slug) }}" class="aspect-[4/3] relative block overflow-hidden bg-gray-100">
-        @php $image = $product->primary_image_url ?? null; @endphp
-        @if ($image)
-            <img src="{{ $image }}" alt="{{ $product->name }}"
+        @php
+            $orig = $product->image_path;
+            $display = null;
+            if ($orig) {
+                $small = preg_replace('/(\.[a-zA-Z0-9]+)$/', '_sm$1', $orig);
+                $display = file_exists(public_path($small)) ? $small : $orig;
+            }
+        @endphp
+        @if ($display)
+            <img src="/{{ $display }}" alt="{{ $product->name }}" loading="lazy"
                 class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
         @else
             <div class="flex items-center justify-center h-full w-full text-gray-400 text-sm">Sem imagem</div>

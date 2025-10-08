@@ -29,7 +29,7 @@ class ProductService
             ->get();
     }
 
-    public function search(string $term, ?string $type = null): Collection
+    public function search(string $term, ?string $type = null, ?string $categorySlug = null): Collection
     {
         $term = trim($term);
         if ($term === '') {
@@ -39,6 +39,7 @@ class ProductService
         $query = Product::with(['entity:id,name,slug', 'category:id,name,slug'])
             ->active()
             ->when(in_array($type, ['product', 'service']), fn($q) => $q->where('type', $type))
+            ->when($categorySlug, fn($q) => $q->whereHas('category', fn($c) => $c->where('slug', $categorySlug)))
             ->where(function ($q) use ($term) {
                 $q->where('name', 'LIKE', "%{$term}%")
                     ->orWhere('description', 'LIKE', "%{$term}%")

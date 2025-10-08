@@ -3,14 +3,26 @@
     'name' => 'q',
     'placeholder' => 'Buscar produtos ou serviços',
     'value' => request('q'),
+    'categories' => \App\Models\Category::query()->active()->orderBy('name')->select('id', 'name', 'slug')->get(),
 ])
 @php($live = $attributes->get('live'))
-<div x-data="searchBarComponent({ live: @json((bool) $live), initial: @json($value), url: @json($action) })" class="relative group">
-    <form x-ref="form" :action="url" method="GET" @submit.prevent="submit()">
-        <input x-model="q" type="text" name="{{ $name }}" placeholder="{{ $placeholder }}"
-            @input.debounce.300ms="changed"
-            class="w-full border rounded pl-11 pr-4 py-2 focus:ring-2 focus:ring-primary/30 outline-none" />
-        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary">🔍</span>
+<div x-data="searchBarComponent({ live: @json((bool) $live), initial: @json($value), url: @json($action), initialCategory: @json(request('cat')) })" class="relative group">
+    <form x-ref="form" :action="url" method="GET" @submit.prevent="submit()" class="flex gap-2">
+        <div class="relative">
+            <select x-model="category" name="cat" @change="changed" class="select w-36">
+                <option value="">Todas</option>
+                @foreach ($categories as $c)
+                    <option value="{{ $c->slug }}">{{ $c->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="relative flex-1">
+            <input x-model="q" type="text" name="{{ $name }}" placeholder="{{ $placeholder }}"
+                @input.debounce.300ms="changed"
+                class="w-full border rounded pl-10 pr-4 py-2 focus:ring-2 focus:ring-primary/30 outline-none" />
+            <span
+                class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary">🔍</span>
+        </div>
     </form>
     <template x-if="live && open && q.trim() !== ''">
         <div class="absolute z-20 mt-2 w-full bg-white border rounded shadow max-h-96 overflow-auto">
@@ -78,7 +90,10 @@
                         }
                         this.loading = true;
                         this.open = true;
-                        fetch(`${url}?q=${encodeURIComponent(term)}`, {
+                        const params = new URLSearchParams();
+                        params.set('q', term);
+                        if (this.category) params.set('cat', this.category);
+                        fetch(`${url}?${params.toString()}`, {
                                 headers: {
                                     'Accept': 'application/json'
                                 }
@@ -93,7 +108,10 @@
                             });
                     },
                     goFull() {
-                        window.location = `${url}?q=${encodeURIComponent(this.q)}`;
+                        const params = new URLSearchParams();
+                        if (this.q) params.set('q', this.q);
+                        if (this.category) params.set('cat', this.category);
+                        window.location = `${url}?${params.toString()}`;
                     },
                     countText() {
                         return this.results.length + ' resultado' + (this.results.length === 1 ? '' : 's');
@@ -101,6 +119,10 @@
                     formatPrice(v) {
                         if (v == null) return '';
                         return 'MZN ' + parseFloat(v).toFixed(2);
+                    },
+                    category: null,
+                    init() {
+                        this.category = this.initialCategory || '';
                     }
                 }
             }
