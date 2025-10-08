@@ -22,7 +22,7 @@ class ProductController extends Controller
             );
         }
 
-        $product->load(['entity', 'category']);
+        $product->load(['entity', 'category', 'images']);
 
         $related = Product::with(['entity:id,name,slug', 'category:id,name,slug'])
             ->active()

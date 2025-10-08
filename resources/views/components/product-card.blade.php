@@ -8,11 +8,14 @@ use Illuminate\Support\Str;
     class="group flex flex-col rounded-lg border border-gray-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
     <a href="{{ route('product.show', $product->slug) }}" class="aspect-[4/3] relative block overflow-hidden bg-gray-100">
         @php
-            $orig = $product->image_path;
+            $primary = method_exists($product, 'primaryImage') ? $product->primaryImage() : null;
+            $orig = $primary?->path ?? $product->image_path;
             $display = null;
             if ($orig) {
-                $small = preg_replace('/(\.[a-zA-Z0-9]+)$/', '_sm$1', $orig);
-                $display = file_exists(public_path($small)) ? $small : $orig;
+                $clean = ltrim($orig, '/');
+                $small = preg_replace('/(\.[a-zA-Z0-9]+)$/', '_sm$1', $clean);
+                $fullSmall = public_path($small);
+                $display = file_exists($fullSmall) ? $small : $clean;
             }
         @endphp
         @if ($display)

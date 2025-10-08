@@ -23,7 +23,11 @@ class ProductUpdateRequest extends FormRequest
             'category_id' => 'nullable|exists:categories,id',
             'type' => 'required|in:product,service',
             'is_active' => 'sometimes|boolean',
-            'image' => 'nullable|image|mimes:jpeg,png,webp|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,webp|max:2048', // legacy
+            'images' => 'nullable|array|max:8',
+            'images.*' => 'image|mimes:jpeg,png,webp|max:2048',
+            'primary_image_index' => 'nullable|integer|min:0',
+            'primary_existing_id' => 'nullable|exists:product_images,id',
         ];
     }
 }

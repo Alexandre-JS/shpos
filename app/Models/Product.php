@@ -44,6 +44,16 @@ class Product extends Model
         return $this->hasMany(View::class);
     }
 
+    public function images(): HasMany
+    {
+        return $this->hasMany(ProductImage::class)->orderBy('position');
+    }
+
+    public function primaryImage(): ?ProductImage
+    {
+        return $this->images->firstWhere('is_primary', true) ?? $this->images->first();
+    }
+
     // Scopes
     public function scopeActive($query)
     {

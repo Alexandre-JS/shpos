@@ -12,7 +12,8 @@ class ImageUploadService
     protected int $maxSize = 2_048_000; // 2MB
 
     /**
-     * Upload com criação de duas versões (800x800 e 400x400). Retorna caminho público da versão grande.
+     * Upload gera 3 variantes: original normalizada (máx 1200x1200), _lg (800x800), _sm (400x400).
+     * Retorna caminho público da variante _lg (para uso principal). Mantemos original processada para futuros crops.
      */
     public function upload(UploadedFile $file, string $directory = 'uploads'): string
     {
@@ -27,19 +28,27 @@ class ImageUploadService
             $extension = 'jpg';
         }
         $filenameBase = uniqid('img_', true);
-        $filename = $filenameBase . '.' . $extension;
-        $relative = $directory . '/' . $filename;
+        // Original base (normalizada até 1200)
+        $origFilename = $filenameBase . '.' . $extension;
+        $origRel = $directory . '/' . $origFilename;
+        $stored = $file->storeAs($directory, $origFilename, 'public');
+        $absOrig = Storage::disk('public')->path($stored);
+        $this->resizeAndCanvas($absOrig, 1200, 1200, preventUpscale: true);
 
-        $stored = $file->storeAs($directory, $filename, 'public');
-        $abs = Storage::disk('public')->path($stored);
+        // Variante grande (_lg)
+        $lgFilename = $filenameBase . '_lg.' . $extension;
+        $lgRel = $directory . '/' . $lgFilename;
+        copy($absOrig, Storage::disk('public')->path($lgRel));
+        $this->resizeAndCanvas(Storage::disk('public')->path($lgRel), 800, 800, preventUpscale: true);
 
-        $this->resizeAndCanvas($abs, 800, 800); // grande
-        $smallFilename = $filenameBase . '_sm.' . $extension;
-        $smallRel = $directory . '/' . $smallFilename;
-        copy($abs, Storage::disk('public')->path($smallRel));
-        $this->resizeAndCanvas(Storage::disk('public')->path($smallRel), 400, 400);
+        // Variante pequena (_sm)
+        $smFilename = $filenameBase . '_sm.' . $extension;
+        $smRel = $directory . '/' . $smFilename;
+        copy($absOrig, Storage::disk('public')->path($smRel));
+        $this->resizeAndCanvas(Storage::disk('public')->path($smRel), 400, 400, preventUpscale: true);
 
-        return 'storage/' . $relative;
+        // Retornamos _lg por ser a principal para visualização
+        return 'storage/' . $lgRel;
     }
 
     public function delete(?string $publicPath): void
@@ -57,7 +66,7 @@ class ImageUploadService
         }
     }
 
-    protected function resizeAndCanvas(string $absolutePath, int $targetW, int $targetH): void
+    protected function resizeAndCanvas(string $absolutePath, int $targetW, int $targetH, bool $preventUpscale = false): void
     {
         [$w, $h, $type] = @getimagesize($absolutePath);
         if (!$w || !$h) return;
@@ -69,6 +78,10 @@ class ImageUploadService
         };
         if (!$src) return;
         $scale = min($targetW / $w, $targetH / $h);
+        if ($preventUpscale && $scale > 1) {
+            // Não aumenta: apenas centraliza em canvas branco
+            $scale = 1;
+        }
         $newW = (int) floor($w * $scale);
         $newH = (int) floor($h * $scale);
         $dst = imagecreatetruecolor($targetW, $targetH);

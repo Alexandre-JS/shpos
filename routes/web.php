@@ -24,6 +24,9 @@ Route::get('/produto/{product:slug}', [ProductController::class, 'show'])->name(
 // Perfil público da entidade (mini-site)
 Route::get('/loja/{entity:slug}', [EntityController::class, 'show'])->name('entity.show');
 
+// Página pública de categoria
+Route::get('/categoria/{category:slug}', [\App\Http\Controllers\CategoryController::class, 'show'])->name('category.show');
+
 // Registro de entidade + usuário (UC01)
 Route::middleware('guest')->group(function () {
     Route::get('/register', [RegisterController::class, 'show'])->name('register.show');
@@ -46,6 +49,8 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureEntityOwner::class])->pref
     Route::get('/produtos/{product}/editar', [ProductManagementController::class, 'edit'])->name('products.edit');
     Route::put('/produtos/{product}', [ProductManagementController::class, 'update'])->name('products.update');
     Route::delete('/produtos/{product}', [ProductManagementController::class, 'destroy'])->name('products.destroy');
+    Route::put('/produtos/{product}/imagens/{image}/primaria', [ProductManagementController::class, 'setPrimaryImage'])->name('products.images.primary');
+    Route::put('/produtos/{product}/imagens/reordenar', [ProductManagementController::class, 'reorderImages'])->name('products.images.reorder');
 
     // Entidade settings
     Route::get('/entidade', [EntitySettingsController::class, 'edit'])->name('entity.settings.edit');

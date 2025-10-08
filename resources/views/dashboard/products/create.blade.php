@@ -53,11 +53,30 @@
                     <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                 @enderror
             </div>
-            <div>
-                <label class="block text-xs font-medium mb-1">Imagem</label>
-                <input type="file" name="image" accept="image/jpeg,image/png,image/webp" class="w-full text-sm" />
-                <p class="text-[10px] text-gray-500 mt-1">Formatos: JPG, PNG, WebP até 2MB.</p>
-                @error('image')
+            <div x-data="multiImagesCreate()" class="space-y-2">
+                <label class="block text-xs font-medium mb-1">Imagens (até 8)</label>
+                <input type="file" name="images[]" multiple accept="image/jpeg,image/png,image/webp"
+                    class="w-full text-sm" @change="handleSelect($event)" />
+                <input type="hidden" name="primary_image_index" :value="primaryIndex" />
+                <p class="text-[10px] text-gray-500">Selecione várias. Clique numa miniatura para definir como principal.
+                </p>
+                <template x-if="previews.length">
+                    <div class="flex flex-wrap gap-2 pt-1">
+                        <template x-for="(p,i) in previews" :key="i">
+                            <button type="button" @click="primaryIndex=i"
+                                class="relative w-20 h-20 border rounded overflow-hidden focus:outline-none"
+                                :class="primaryIndex === i ? 'ring-2 ring-blue-500 border-blue-500' : 'border-gray-200'">
+                                <img :src="p" alt="preview" class="object-cover w-full h-full" />
+                                <span class="absolute bottom-0 inset-x-0 text-[10px] bg-black/50 text-white"
+                                    x-text="primaryIndex===i ? 'Principal' : ''"></span>
+                            </button>
+                        </template>
+                    </div>
+                </template>
+                @error('images')
+                    <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                @enderror
+                @error('images.*')
                     <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                 @enderror
             </div>
@@ -73,3 +92,28 @@
         </form>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        function multiImagesCreate() {
+            return {
+                previews: [],
+                primaryIndex: 0,
+                handleSelect(e) {
+                    this.previews = [];
+                    const files = Array.from(e.target.files || []);
+                    files.slice(0, 8).forEach((f, idx) => {
+                        const reader = new FileReader();
+                        reader.onload = ev => {
+                            this.previews[idx] = ev.target.result;
+                        }; // reactive
+                        reader.readAsDataURL(f);
+                    });
+                    if (this.primaryIndex >= files.length) {
+                        this.primaryIndex = 0;
+                    }
+                }
+            }
+        }
+    </script>
+@endpush

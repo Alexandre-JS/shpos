@@ -54,19 +54,78 @@
                     <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                 @enderror
             </div>
-            <div class="space-y-2">
-                <label class="block text-xs font-medium mb-1">Imagem (substituir)</label>
-                @if ($product->image_path)
-                    <div
-                        class="w-32 aspect-square bg-gray-100 flex items-center justify-center overflow-hidden rounded border">
-                        <img src="/{{ $product->image_path }}" alt="preview" class="object-cover w-full h-full" />
+            <div class="space-y-4" x-data="multiImagesEdit({ existing: @json(
+                $product->images->map(fn($im) => [
+                        'id' => $im->id,
+                        'path' => asset($im->path),
+                        'is_primary' => $im->is_primary,
+                    ])), reorderUrl: '{{ route('dashboard.products.images.reorder', $product) }}', csrf: '{{ csrf_token() }}' })">
+                <div>
+                    <label class="block text-xs font-medium mb-1">Imagens atuais</label>
+                    <template x-if="existing.length">
+                        <div class="flex flex-wrap gap-2" @dragover.prevent>
+                            <template x-for="(img,i) in existing" :key="img.id">
+                                <div class="relative w-20 h-20" draggable="true" @dragstart="dragStart(i,$event)"
+                                    @drop.prevent="drop(i,$event)" @dragover.prevent
+                                    :class="draggingIndex === i ? 'opacity-40' : ''">
+                                    <label class="block w-full h-full border rounded overflow-hidden cursor-move group">
+                                        <input type="radio" class="absolute inset-0 opacity-0 cursor-pointer"
+                                            name="primary_existing_id" :value="img.id" :checked="img.is_primary" />
+                                        <img :src="img.path" alt="img"
+                                            class="object-cover w-full h-full group-hover:scale-105 transition-transform" />
+                                        <span class="absolute top-0 left-0 bg-black/40 text-[9px] px-1 text-white">#<span
+                                                x-text="i+1"></span></span>
+                                        <span
+                                            class="absolute bottom-0 inset-x-0 text-[10px] bg-black/50 text-white text-center"
+                                            x-text="img.is_primary ? 'Principal' : 'Marcar'"></span>
+                                    </label>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                    <p class="text-[10px] text-gray-500 mt-1">Arraste para reordenar. Seleciona para definir principal.</p>
+                    <template x-if="reorderStatus">
+                        <p class="text-[10px]" :class="reorderStatus === 'Salvo' ? 'text-green-600' : 'text-gray-500'"
+                            x-text="'Ordem: '+reorderStatus"></p>
+                    </template>
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-xs font-medium mb-1">Adicionar novas (até 8)</label>
+                    <input type="file" name="images[]" multiple accept="image/jpeg,image/png,image/webp"
+                        class="w-full text-sm" @change="handleSelect($event)" />
+                    <input type="hidden" name="primary_image_index" :value="primaryIndex" />
+                    <p class="text-[10px] text-gray-500">Clique numa nova miniatura para tornar principal (irá substituir
+                        seleção acima).</p>
+                    <template x-if="previews.length">
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="(p,i) in previews" :key="i">
+                                <button type="button" @click="selectPrimary(i)"
+                                    class="relative w-20 h-20 border rounded overflow-hidden focus:outline-none"
+                                    :class="primaryIndex === i ? 'ring-2 ring-blue-500 border-blue-500' : 'border-gray-200'">
+                                    <img :src="p" class="object-cover w-full h-full" />
+                                    <span class="absolute bottom-0 inset-x-0 text-[10px] bg-black/50 text-white"
+                                        x-text="primaryIndex===i ? 'Principal' : ''"></span>
+                                </button>
+                            </template>
+                        </div>
+                    </template>
+                    @error('images')
+                        <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                    @enderror
+                    @error('images.*')
+                        <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+                <details class="text-xs text-gray-500">
+                    <summary class="cursor-pointer select-none">Compatibilidade antiga (uma imagem)</summary>
+                    <div class="pt-2 space-y-2">
+                        <input type="file" name="image" accept="image/jpeg,image/png,image/webp"
+                            class="w-full text-sm" />
+                        @error('image')
+                            <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
-                @endif
-                <input type="file" name="image" accept="image/jpeg,image/png,image/webp" class="w-full text-sm" />
-                <p class="text-[10px] text-gray-500">Deixa vazio para manter a atual.</p>
-                @error('image')
-                    <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
-                @enderror
+                </details>
             </div>
             <div class="flex items-center gap-3">
                 <label class="inline-flex items-center gap-2 text-sm">
@@ -81,10 +140,82 @@
                     <button class="px-4 py-2 text-sm border rounded text-red-600">Remover</button>
                 </form>
                 <div class="flex gap-3">
-                    <a href="{{ route('dashboard.products.index') }}" class="px-4 py-2 text-sm border rounded">Cancelar</a>
+                    <a href="{{ route('dashboard.products.index') }}"
+                        class="px-4 py-2 text-sm border rounded">Cancelar</a>
                     <button class="px-5 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">Salvar</button>
                 </div>
             </div>
         </form>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        function multiImagesEdit(cfg) {
+            return {
+                existing: cfg.existing || [],
+                previews: [],
+                primaryIndex: null,
+                draggingIndex: null,
+                reorderUrl: cfg.reorderUrl,
+                csrf: cfg.csrf,
+                reorderStatus: '',
+                handleSelect(e) {
+                    this.previews = [];
+                    const files = Array.from(e.target.files || []);
+                    files.slice(0, 8).forEach((f, idx) => {
+                        const reader = new FileReader();
+                        reader.onload = ev => {
+                            this.previews[idx] = ev.target.result;
+                        };
+                        reader.readAsDataURL(f);
+                    });
+                    if (files.length) {
+                        document.querySelectorAll('input[name="primary_existing_id"]').forEach(el => el.checked = false);
+                        this.primaryIndex = 0;
+                    }
+                },
+                selectPrimary(i) {
+                    this.primaryIndex = i;
+                    document.querySelectorAll('input[name="primary_existing_id"]').forEach(el => el.checked = false);
+                },
+                dragStart(i, ev) {
+                    this.draggingIndex = i;
+                    ev.dataTransfer.effectAllowed = 'move';
+                },
+                drop(i, ev) {
+                    if (this.draggingIndex === null || this.draggingIndex === i) {
+                        this.draggingIndex = null;
+                        return;
+                    }
+                    const item = this.existing.splice(this.draggingIndex, 1)[0];
+                    this.existing.splice(i, 0, item);
+                    this.draggingIndex = null;
+                    this.sendReorder();
+                },
+                sendReorder() {
+                    const order = this.existing.map(im => im.id);
+                    this.reorderStatus = 'a enviar...';
+                    fetch(this.reorderUrl, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': this.csrf,
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                order
+                            })
+                        }).then(r => r.json()).then(() => {
+                            this.reorderStatus = 'Salvo';
+                            setTimeout(() => this.reorderStatus = '', 3000);
+                        })
+                        .catch(() => {
+                            this.reorderStatus = 'Erro';
+                            setTimeout(() => this.reorderStatus = '', 4000);
+                        });
+                }
+            }
+        }
+    </script>
+@endpush

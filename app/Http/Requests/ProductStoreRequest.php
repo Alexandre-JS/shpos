@@ -20,7 +20,12 @@ class ProductStoreRequest extends FormRequest
             'category_id' => 'nullable|exists:categories,id',
             'type' => 'required|in:product,service',
             'is_active' => 'sometimes|boolean',
+            // Legacy single image (deprecated):
             'image' => 'nullable|image|mimes:jpeg,png,webp|max:2048',
+            // New multiple images support:
+            'images' => 'nullable|array|max:8',
+            'images.*' => 'image|mimes:jpeg,png,webp|max:2048',
+            'primary_image_index' => 'nullable|integer|min:0',
         ];
     }
 }
