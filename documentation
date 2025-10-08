@@ -1,0 +1,720 @@
+Documento de Engenharia de Software – Plataforma de Vitrine Digital
+1. Visão Geral do Sistema
+1.1. Objetivo
+Criar uma plataforma web onde lojas, empresas e profissionais individuais possam expor produtos e serviços através de perfis públicos, permitindo que consumidores descubram e contactem diretamente os vendedores.
+1.2. Escopo
+
+✅ Cadastro e gestão de perfis de entidades (lojas/empresas/profissionais)
+✅ Cadastro e gestão de produtos/serviços
+✅ Navegação pública sem necessidade de autenticação para consumidores
+✅ Sistema de busca e filtros
+✅ Contacto direto via WhatsApp, telefone e email
+✅ Páginas permanentes e compartilháveis para cada entidade
+❌ NÃO inclui: sistema de pagamentos, carrinho de compras, transações
+
+1.3. Stack Tecnológica
+
+Backend: Laravel 10+ (PHP 8.1+)
+Frontend: Blade Templates + Tailwind CSS
+Banco de Dados: MySQL 8.0+ ou PostgreSQL 14+
+Servidor: Apache/Nginx + PHP-FPM
+Armazenamento: Local storage (futuro: S3/Cloudinary)
+
+
+2. Requisitos Funcionais (RF)
+IDDescriçãoPrioridadeRF01Sistema deve permitir registro de entidades com dados completosALTARF02Sistema deve permitir login/logout de donos de entidadesALTARF03Sistema deve permitir CRUD de produtos/serviçosALTARF04Sistema deve exibir listagem pública de produtos/serviçosALTARF05Sistema deve permitir filtros: Todos, Produtos, ServiçosALTARF06Sistema deve exibir produtos recentemente adicionadosMÉDIARF07Sistema deve exibir produtos mais procurados (por views)MÉDIARF08Sistema deve destacar produtos patrocinadosBAIXARF09Sistema deve permitir busca por nome de produto/serviçoALTARF10Sistema deve exibir detalhes completos de produto/serviçoALTARF11Sistema deve gerar URL permanente para cada entidadeALTARF12Sistema deve exibir perfil público da entidade (mini-site)ALTARF13Sistema deve rastrear visualizações de produtosMÉDIARF14Sistema deve fornecer links diretos para WhatsAppALTARF15Sistema deve permitir admin moderar conteúdoMÉDIA
+
+3. Requisitos Não Funcionais (RNF)
+IDDescriçãoMétricaRNF01Design responsivo (mobile-first)Funcional em telas 320px+RNF02Performance de carregamentoPágina inicial < 3sRNF03EscalabilidadeSuportar 10.000 entidadesRNF04Disponibilidade99% uptimeRNF05SegurançaHTTPS obrigatório, validações server-sideRNF06SEO-friendlyMeta tags, URLs limpas, sitemapRNF07AcessibilidadeContrastes adequados, alt text em imagens
+
+4. Modelo de Dados
+4.1. Diagrama de Relacionamentos (ER)
+users (1) ──────< (1) entities (1) ──────< (N) products
+                                               |
+                                               |
+                                          (N) views
+                                               
+categories (1) ──────< (N) products
+4.2. Tabelas Detalhadas
+users (Autenticação)
+sqlid                  BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT
+name                VARCHAR(255) NOT NULL
+email               VARCHAR(255) UNIQUE NOT NULL
+email_verified_at   TIMESTAMP NULL
+password            VARCHAR(255) NOT NULL
+remember_token      VARCHAR(100) NULL
+created_at          TIMESTAMP
+updated_at          TIMESTAMP
+
+INDEX idx_email (email)
+entities (Lojas/Empresas/Profissionais)
+sqlid                  BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT
+user_id             BIGINT UNSIGNED NOT NULL
+name                VARCHAR(255) NOT NULL
+slug                VARCHAR(255) UNIQUE NOT NULL
+description         TEXT NOT NULL
+logo_path           VARCHAR(500) NULL
+location_city       VARCHAR(100) NOT NULL
+location_district   VARCHAR(100) NULL
+phone               VARCHAR(20) NULL
+whatsapp            VARCHAR(20) NOT NULL
+email               VARCHAR(255) NULL
+facebook_url        VARCHAR(500) NULL
+instagram_url       VARCHAR(500) NULL
+website_url         VARCHAR(500) NULL
+is_active           BOOLEAN DEFAULT TRUE
+is_featured         BOOLEAN DEFAULT FALSE
+plan_type           ENUM('free', 'premium') DEFAULT 'free'
+created_at          TIMESTAMP
+updated_at          TIMESTAMP
+
+FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+INDEX idx_slug (slug)
+INDEX idx_user_id (user_id)
+INDEX idx_is_active (is_active)
+INDEX idx_is_featured (is_featured)
+Regras de Negócio:
+
+slug gerado automaticamente a partir de name (ex: "Loja ABC" → "loja-abc")
+whatsapp obrigatório (principal canal de contacto)
+logo_path: máximo 2MB, formatos: JPG, PNG, WebP
+is_featured: apenas admin pode definir como TRUE
+
+categories (Categorias)
+sqlid          BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT
+name        VARCHAR(100) NOT NULL
+slug        VARCHAR(100) UNIQUE NOT NULL
+type        ENUM('product', 'service', 'both') DEFAULT 'both'
+icon        VARCHAR(50) NULL
+is_active   BOOLEAN DEFAULT TRUE
+created_at  TIMESTAMP
+updated_at  TIMESTAMP
+
+INDEX idx_type (type)
+INDEX idx_is_active (is_active)
+Categorias Iniciais (Seeder):
+
+Moda & Beleza (both)
+Alimentos & Bebidas (product)
+Tecnologia & Eletrónicos (product)
+Casa & Construção (both)
+Serviços Profissionais (service)
+Saúde & Bem-estar (both)
+Educação & Cursos (service)
+Eventos & Entretenimento (service)
+
+products (Produtos/Serviços)
+sqlid              BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT
+entity_id       BIGINT UNSIGNED NOT NULL
+category_id     BIGINT UNSIGNED NOT NULL
+name            VARCHAR(255) NOT NULL
+slug            VARCHAR(255) NOT NULL
+description     TEXT NOT NULL
+price           DECIMAL(10,2) NULL
+image_path      VARCHAR(500) NULL
+type            ENUM('product', 'service') NOT NULL
+is_active       BOOLEAN DEFAULT TRUE
+views_count     INT UNSIGNED DEFAULT 0
+created_at      TIMESTAMP
+updated_at      TIMESTAMP
+
+FOREIGN KEY (entity_id) REFERENCES entities(id) ON DELETE CASCADE
+FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT
+INDEX idx_entity_id (entity_id)
+INDEX idx_category_id (category_id)
+INDEX idx_type (type)
+INDEX idx_is_active (is_active)
+INDEX idx_views_count (views_count)
+INDEX idx_created_at (created_at)
+UNIQUE INDEX idx_entity_slug (entity_id, slug)
+Regras de Negócio:
+
+description: mínimo 20 caracteres, máximo 1000
+price: NULL permitido (ex: "sob consulta")
+image_path: máximo 2MB, formatos: JPG, PNG, WebP
+slug: único dentro da mesma entidade
+Limite por plano:
+
+Free: máximo 10 produtos/serviços por entidade
+Premium: ilimitado
+
+
+
+views (Rastreamento de Visualizações)
+sqlid          BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT
+product_id  BIGINT UNSIGNED NOT NULL
+ip_address  VARCHAR(45) NOT NULL
+user_agent  VARCHAR(500) NULL
+created_at  TIMESTAMP
+
+FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+INDEX idx_product_id (product_id)
+INDEX idx_created_at (created_at)
+Regras de Negócio:
+
+1 view por IP a cada 24h por produto
+Usado para calcular "Mais Procurados"
+
+
+5. Casos de Uso Detalhados
+UC01 - Registrar Entidade
+Actor: Dono de Loja/Empresa/Profissional
+Pré-condições: Nenhuma
+Fluxo Principal:
+
+Utilizador acede à página de registro
+Sistema exibe formulário com campos:
+
+Nome (obrigatório)
+Email (obrigatório, único)
+Password (obrigatório, mín. 8 caracteres)
+Nome da Entidade (obrigatório)
+Descrição (obrigatório, mín. 20 chars)
+Localização: Cidade (obrigatório)
+Localização: Bairro (opcional)
+WhatsApp (obrigatório, formato: 258XXXXXXXXX)
+Telefone (opcional)
+Email da entidade (opcional)
+Redes sociais (opcional)
+
+
+Utilizador preenche e submete
+Sistema valida dados
+Sistema cria conta de utilizador
+Sistema cria perfil de entidade
+Sistema gera slug único
+Sistema redireciona para dashboard
+Sistema exibe mensagem de sucesso
+
+Fluxos Alternativos:
+
+4a. Email já existe: Sistema exibe erro, mantém dados preenchidos
+4b. Slug já existe: Sistema adiciona número ao slug (ex: loja-abc-2)
+4c. WhatsApp inválido: Sistema exibe erro de formato
+
+Pós-condições: Entidade criada e pode adicionar produtos
+
+UC02 - Adicionar Produto/Serviço
+Actor: Dono de Entidade
+Pré-condições: Utilizador autenticado, entidade criada
+Fluxo Principal:
+
+Utilizador acede ao dashboard
+Sistema exibe botão "Adicionar Produto/Serviço"
+Utilizador clica no botão
+Sistema exibe formulário:
+
+Tipo (Product/Service)
+Nome (obrigatório)
+Categoria (obrigatório, dropdown)
+Descrição (obrigatório, mín. 20 chars)
+Preço (opcional)
+Imagem (opcional, máx. 2MB)
+
+
+Utilizador preenche e submete
+Sistema valida dados
+Sistema verifica limite do plano (free: 10 máx)
+Sistema faz upload da imagem (se houver)
+Sistema cria produto
+Sistema gera slug único
+Sistema redireciona para lista de produtos
+Sistema exibe mensagem de sucesso
+
+Fluxos Alternativos:
+
+7a. Limite atingido: Sistema exibe mensagem "Upgrade para Premium"
+8a. Imagem muito grande: Sistema exibe erro
+8b. Formato inválido: Sistema exibe erro
+
+Pós-condições: Produto visível no perfil da entidade e na listagem pública
+
+UC03 - Visualizar Listagem de Produtos
+Actor: Consumidor (não autenticado)
+Pré-condições: Nenhuma
+Fluxo Principal:
+
+Consumidor acede à homepage
+Sistema carrega produtos ativos
+Sistema exibe:
+
+Filtros: Todos | Produtos | Serviços
+Secção "Recentemente Adicionados" (últimos 12)
+Secção "Mais Procurados" (maior views_count)
+Secção "Patrocinados" (is_featured = true)
+Grid de todos os produtos
+
+
+Cada card exibe:
+
+Imagem
+Nome do produto
+Preço (se houver)
+Nome da entidade
+Localização
+
+
+Consumidor pode clicar para ver detalhes
+
+Fluxos Alternativos:
+
+2a. Nenhum produto cadastrado: Sistema exibe mensagem "Em breve"
+
+Pós-condições: Nenhuma
+
+UC04 - Pesquisar Produto/Serviço
+Actor: Consumidor (não autenticado)
+Pré-condições: Nenhuma
+Fluxo Principal:
+
+Consumidor acede à homepage
+Sistema exibe campo de busca
+Consumidor digita termo de busca
+Sistema busca em tempo real (AJAX) em:
+
+products.name
+products.description
+entities.name
+
+
+Sistema exibe resultados filtrados
+Consumidor clica em resultado
+
+Fluxos Alternativos:
+
+5a. Sem resultados: Sistema exibe "Nenhum resultado encontrado"
+
+Pós-condições: Nenhuma
+
+UC05 - Visualizar Detalhes do Produto
+Actor: Consumidor (não autenticado)
+Pré-condições: Produto existe e está ativo
+Fluxo Principal:
+
+Consumidor clica em produto
+Sistema registra visualização (view)
+Sistema incrementa views_count
+Sistema exibe página com:
+
+Imagem principal
+Nome do produto
+Descrição completa
+Preço (se houver)
+Categoria
+Localização
+Card da Entidade:
+
+Logo
+Nome
+Botões de contacto:
+
+WhatsApp (link direto)
+Telefone (link tel:)
+Email (link mailto:)
+
+
+Link "Ver mais produtos desta loja"
+
+
+
+
+Consumidor pode clicar nos botões de contacto
+
+Fluxos Alternativos:
+
+2a. Mesma IP nas últimas 24h: Não registra nova view
+
+Pós-condições: View registrada, views_count incrementado
+
+UC06 - Acessar Perfil da Entidade
+Actor: Consumidor (não autenticado)
+Pré-condições: Entidade existe e está ativa
+Fluxo Principal:
+
+Consumidor acede a site.com/loja/{slug}
+Sistema carrega dados da entidade
+Sistema exibe:
+
+Banner/Logo
+Nome da entidade
+Descrição
+Localização
+Contactos (WhatsApp, telefone, email)
+Redes sociais
+Grid de todos os produtos/serviços desta entidade
+
+
+Consumidor pode clicar em qualquer produto
+
+Fluxos Alternativos:
+
+2a. Entidade não existe: Sistema exibe 404
+2b. Entidade inativa: Sistema exibe 404
+
+Pós-condições: Nenhuma
+
+UC07 - Contactar Entidade via WhatsApp
+Actor: Consumidor (não autenticado)
+Pré-condições: Produto/Entidade tem WhatsApp cadastrado
+Fluxo Principal:
+
+Consumidor clica em botão "WhatsApp"
+Sistema gera link: https://wa.me/258XXXXXXXXX?text=Olá, vi o produto [Nome] na [Plataforma]
+Sistema abre link em nova aba
+Consumidor é redirecionado para WhatsApp
+
+Pós-condições: Contacto estabelecido fora da plataforma
+
+UC08 - Gerir Produtos (Editar/Apagar)
+Actor: Dono de Entidade
+Pré-condições: Utilizador autenticado, produto pertence à sua entidade
+Fluxo Principal (Editar):
+
+Utilizador acede ao dashboard
+Sistema exibe lista de produtos
+Utilizador clica em "Editar"
+Sistema exibe formulário preenchido
+Utilizador altera dados
+Utilizador submete
+Sistema valida e atualiza
+Sistema exibe mensagem de sucesso
+
+Fluxo Principal (Apagar):
+
+Utilizador clica em "Apagar"
+Sistema exibe confirmação
+Utilizador confirma
+Sistema soft-delete (is_active = false)
+Sistema exibe mensagem de sucesso
+
+Pós-condições: Produto atualizado ou removido da listagem pública
+
+6. Regras de Negócio
+RN01 - Limites por Plano
+Plano Free:
+- Produtos/serviços: máximo 10
+- Destaque patrocinado: não
+- Estatísticas: views dos últimos 7 dias
+
+Plano Premium (futuro):
+- Produtos/serviços: ilimitado
+- Destaque patrocinado: sim
+- Estatísticas: histórico completo
+- Badge "Verificado"
+RN02 - Validações de Imagens
+
+Tamanho máximo: 2MB
+Formatos: JPG, JPEG, PNG, WebP
+Dimensões mínimas: 300x300px
+Sistema redimensiona para: 800x800px (detalhe), 400x400px (listagem)
+
+RN03 - Geração de Slugs
+php// Exemplo: "Loja ABC Maputo" → "loja-abc-maputo"
+- Remove acentos
+- Converte para minúsculas
+- Substitui espaços por hífens
+- Remove caracteres especiais
+- Se duplicado, adiciona número: "loja-abc-maputo-2"
+RN04 - Cálculo de "Mais Procurados"
+
+Baseado em views_count dos últimos 30 dias
+Mínimo de 5 views para aparecer na secção
+Atualizado a cada requisição (sem cache por enquanto)
+
+RN05 - Produtos "Recentemente Adicionados"
+
+Últimos 12 produtos por created_at DESC
+Apenas produtos ativos (is_active = true)
+De entidades ativas (entities.is_active = true)
+
+RN06 - Rastreamento de Views
+
+1 view única por IP a cada 24h por produto
+Views de bots não são contabilizadas (validar user_agent)
+Views do próprio dono não são contabilizadas
+
+RN07 - Formato de Contactos
+WhatsApp: 258XXXXXXXXX (9 dígitos após código país)
+Telefone: formato livre
+Email: validação padrão RFC
+
+7. Arquitetura do Sistema
+7.1. Estrutura MVC
+app/
+├── Http/
+│   ├── Controllers/
+│   │   ├── HomeController.php          # Listagem pública
+│   │   ├── ProductController.php       # Detalhes, views tracking
+│   │   ├── EntityController.php        # Perfil público, registro
+│   │   ├── Dashboard/
+│   │   │   ├── DashboardController.php
+│   │   │   ├── ProductManagementController.php
+│   │   │   └── EntitySettingsController.php
+│   │   └── Admin/
+│   │       ├── AdminController.php
+│   │       └── ModerationController.php
+│   ├── Requests/
+│   │   ├── EntityRegistrationRequest.php
+│   │   ├── ProductStoreRequest.php
+│   │   └── ProductUpdateRequest.php
+│   └── Middleware/
+│       └── EnsureEntityOwner.php       # Verifica ownership
+├── Models/
+│   ├── User.php
+│   ├── Entity.php
+│   ├── Product.php
+│   ├── Category.php
+│   └── View.php
+├── Services/
+│   ├── ProductService.php              # Lógica de filtros, busca
+│   ├── ViewTrackingService.php         # Registro de views
+│   ├── SlugGeneratorService.php        # Geração de slugs únicos
+│   └── ImageUploadService.php          # Upload e resize
+└── Policies/
+    ├── EntityPolicy.php                # Autorização
+    └── ProductPolicy.php
+7.2. Camadas de Serviço
+ProductService.php (Exemplo)
+phpclass ProductService
+{
+    public function getRecentProducts(int $limit = 12)
+    {
+        return Product::with('entity', 'category')
+            ->where('is_active', true)
+            ->whereHas('entity', fn($q) => $q->where('is_active', true))
+            ->latest()
+            ->limit($limit)
+            ->get();
+    }
+    
+    public function getMostViewed(int $limit = 12)
+    {
+        return Product::with('entity', 'category')
+            ->where('is_active', true)
+            ->where('views_count', '>=', 5)
+            ->whereHas('entity', fn($q) => $q->where('is_active', true))
+            ->orderByDesc('views_count')
+            ->limit($limit)
+            ->get();
+    }
+    
+    public function search(string $query)
+    {
+        return Product::with('entity', 'category')
+            ->where('is_active', true)
+            ->where(function($q) use ($query) {
+                $q->where('name', 'LIKE', "%{$query}%")
+                  ->orWhere('description', 'LIKE', "%{$query}%")
+                  ->orWhereHas('entity', fn($sq) => 
+                      $sq->where('name', 'LIKE', "%{$query}%")
+                  );
+            })
+            ->get();
+    }
+}
+
+8. Rotas (Routes)
+8.1. Rotas Públicas
+php// Home e listagens
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/produtos', [HomeController::class, 'products'])->name('products');
+Route::get('/servicos', [HomeController::class, 'services'])->name('services');
+Route::get('/buscar', [HomeController::class, 'search'])->name('search');
+
+// Produto/Serviço
+Route::get('/produto/{product:slug}', [ProductController::class, 'show'])->name('product.show');
+
+// Perfil da Entidade
+Route::get('/loja/{entity:slug}', [EntityController::class, 'show'])->name('entity.show');
+8.2. Rotas Autenticadas
+phpRoute::middleware(['auth'])->group(function () {
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // Gestão de Produtos
+    Route::resource('dashboard/produtos', ProductManagementController::class)
+        ->names('dashboard.products');
+    
+    // Configurações da Entidade
+    Route::get('/dashboard/configuracoes', [EntitySettingsController::class, 'edit'])
+        ->name('dashboard.settings');
+    Route::put('/dashboard/configuracoes', [EntitySettingsController::class, 'update']);
+});
+8.3. Rotas de Admin
+phpRoute::middleware(['auth', 'is_admin'])->prefix('admin')->group(function () {
+    Route::get('/', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/entidades', [ModerationController::class, 'entities']);
+    Route::post('/entidades/{entity}/toggle-featured', [ModerationController::class, 'toggleFeatured']);
+    Route::delete('/produtos/{product}', [ModerationController::class, 'deleteProduct']);
+});
+
+9. Views (Blade Templates)
+9.1. Estrutura de Layouts
+resources/views/
+├── layouts/
+│   ├── app.blade.php               # Layout principal
+│   ├── dashboard.blade.php         # Layout do dashboard
+│   └── admin.blade.php             # Layout admin
+├── components/
+│   ├── product-card.blade.php      # Card de produto
+│   ├── entity-card.blade.php       # Card de entidade
+│   ├── search-bar.blade.php        # Barra de busca
+│   └── contact-buttons.blade.php   # Botões de contacto
+├── home/
+│   └── index.blade.php             # Homepage
+├── products/
+│   └── show.blade.php              # Detalhes do produto
+├── entities/
+│   ├── show.blade.php              # Perfil da entidade
+│   └── register.blade.php          # Formulário de registro
+└── dashboard/
+    ├── index.blade.php             # Dashboard principal
+    ├── products/
+    │   ├── index.blade.php         # Lista de produtos
+    │   ├── create.blade.php        # Criar produto
+    │   └── edit.blade.php          # Editar produto
+    └── settings/
+        └── edit.blade.php          # Configurações
+
+10. Segurança
+10.1. Validações
+
+Server-side: Todas as validações em FormRequests
+Client-side: Validações básicas em HTML5 (UX)
+CSRF: Proteção nativa do Laravel em todos os forms
+SQL Injection: Eloquent ORM previne automaticamente
+XSS: Blade escapa variáveis por padrão {{ $var }}
+
+10.2. Upload de Ficheiros
+php// ImageUploadService.php
+public function upload($file, $directory)
+{
+    // Validar tipo MIME
+    if (!in_array($file->getMimeType(), ['image/jpeg', 'image/png', 'image/webp'])) {
+        throw new Exception('Formato inválido');
+    }
+    
+    // Validar tamanho
+    if ($file->getSize() > 2048000) { // 2MB
+        throw new Exception('Ficheiro muito grande');
+    }
+    
+    // Redimensionar e salvar
+    // ...
+}
+10.3. Autorização
+php// ProductPolicy.php
+public function update(User $user, Product $product)
+{
+    return $user->entity->id === $product->entity_id;
+}
+
+// No Controller
+$this->authorize('update', $product);
+
+11. Performance e Otimização
+11.1. Queries Otimizadas
+php// ❌ Evitar N+1 queries
+Product::all(); // depois $product->entity em loop
+
+// ✅ Usar eager loading
+Product::with('entity', 'category')->get();
+11.2. Índices no Banco
+
+Todos os campos usados em WHERE, JOIN, ORDER BY devem ter índices
+Índices compostos para queries frequentes:
+
+sql  INDEX idx_active_created (is_active, created_at)
+11.3. Paginação
+
+Listagem pública: 24 produtos por página
+Dashboard: 15 produtos por página
+
+
+12. SEO
+12.1. URLs Amigáveis
+✅ /loja/pastelaria-sabor-tropical
+❌ /entity?id=123
+
+✅ /produto/bolo-aniversario-chocolate
+❌ /product/456
+12.2. Meta Tags Dinâmicas
+php// No Blade
+<title>{{ $product->name }} - {{ $entity->name }} | Plataforma</title>
+<meta name="description" content="{{ Str::limit($product->description, 160) }}">
+<meta property="og:title" content="{{ $product->name }}">
+<meta property="og:image" content="{{ asset($product->image_path) }}">
+12.3. Sitemap.xml
+
+Gerar automaticamente com Laravel
+Incluir todas as páginas públicas
+Atualizar diariamente
+
+
+13. Testes
+13.1. Testes Unitários
+php// tests/Unit/SlugGeneratorServiceTest.php
+test('gera slug único quando duplicado', function () {
+    $service = new SlugGeneratorService();
+    
+    Entity::factory()->create(['slug' => 'loja-abc']);
+    
+    $slug = $service->generate('Loja ABC', Entity::class);
+    
+    expect($slug)->toBe('loja-abc-2');
+});
+13.2. Testes de Feature
+php// tests/Feature/ProductCreationTest.php
+test('dono pode criar produto', function () {
+    $user = User::factory()->create();
+    $entity = Entity::factory()->create(['user_id' => $user->id]);
+    
+    $response = $this->actingAs($user)->post('/dashboard/produtos', [
+        'name' => 'Produto Teste',
+        'description' => 'Descrição com mais de 20 caracteres',
+        'type' => 'product',
+        'category_id' => Category::first()->id,
+    ]);
+    
+    $response->assertRedirect();
+    $this->assertDatabaseHas('products', ['name' => 'Produto Teste']);
+});
+
+14. Deployment (Fase 1)
+14.1. Requisitos do Servidor
+
+PHP 8.1+
+MySQL 8.0+ ou PostgreSQL 14+
+Nginx ou Apache
+Composer
+Node.js (para compilar assets)
+
+14.2. Variáveis de Ambiente (.env)
+envAPP_NAME="Plataforma Vitrine"
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://suaplatforma.co.mz
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=plataforma_vitrine
+DB_USERNAME=root
+DB_PASSWORD=
+
+FILESYSTEM_DISK=public
+
+MAIL_MAILER=smtp
+# ... configurações de email
+14.3. Checklist de Deploy
+
+ composer install --optimize-autoloader --no-dev
+ php artisan migrate --force
+ php artisan db:seed --class=CategorySeeder
+ php artisan storage:link
+ php artisan config:cache
+ php artisan route:cache
+ php artisan view:cache
+ npm run build
+ Configurar SSL (Let's Encrypt)
+ Configurar backups automáticos

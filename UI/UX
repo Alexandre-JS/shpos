@@ -1,0 +1,115 @@
+Enquadramento de UI/UX com DaisyUI
+🎯 Objetivo de Experiência
+
+Descoberta rápida e contato fácil.
+
+Páginas de produtos e lojas funcionam como mini-portfólio → clareza de informação + CTA imediato (WhatsApp).
+
+Menos “embelezamento solto”, mais consistência.
+
+⚙️ 1. Tokens (Design System Base)
+
+Criar um arquivo interno (ex: resources/views/components/\_tokens.md ou README de UI) com definições fixas:
+
+Spacing: 2, 4, 6, 8, 12, 16, 24, 32
+
+Radius: rounded-sm (4) | rounded-md (8) | rounded-lg (12)
+
+Sombras: shadow-sm (cards) | shadow-md (hover) | shadow-lg (destaque)
+
+Tipografia:
+
+h1 → text-3xl md:text-4xl font-bold
+
+h2 → text-xl font-semibold
+
+h3 → text-sm uppercase tracking-wide text-gray-500
+
+body → text-sm md:text-base leading-relaxed
+
+meta → text-xs text-gray-500
+
+Cores semânticas (tema DaisyUI custom):
+
+primary → ação principal (CTA contato)
+
+secondary → filtros ativos
+
+accent → destaques (ex: “Novo”)
+
+neutral → superfícies e contornos
+
+info/success/warning/error → estados de sistema
+
+🧩 2. Componentes Base Internos (Encapsular DaisyUI)
+
+Criar Blade Components reutilizáveis, para não poluir views com classes. Exemplos:
+
+<!-- Container padrão -->
+<x-app-container>
+   {{ $slot }}
+</x-app-container>
+
+<!-- Card de Produto -->
+<x-card kind="product" :title="$product->name" :price="$product->price" :image="$product->image" />
+
+<!-- Card de Loja -->
+<x-card kind="entity" :title="$shop->name" :location="$shop->location" />
+
+<!-- Estado vazio -->
+<x-empty icon="shopping-bag" message="Nenhum produto encontrado." />
+
+<!-- Skeleton de carregamento -->
+<x-skeleton type="card" />
+
+📋 3. Estados Universais
+
+Empty: Mensagem curta + ícone amigável.
+
+Loading: Skeletons (<x-skeleton type="card" />).
+
+Error: Cor semântica error + CTA opcional “Tentar novamente”.
+
+Disabled: Botões primários seguem padrão DaisyUI (btn-disabled).
+
+🎨 4. Tema DaisyUI Custom
+
+No tailwind.config.js:
+
+daisyui: {
+themes: [
+{
+shops: {
+"primary": "#0284c7", // Azul CTA contato
+"secondary": "#f59e0b", // Amarelo para filtros ativos
+"accent": "#10b981", // Verde para destaque
+"neutral": "#f3f4f6", // Fundo neutro
+"base-100": "#ffffff", // Base branca
+"info": "#3b82f6",
+"success": "#22c55e",
+"warning": "#facc15",
+"error": "#ef4444",
+},
+},
+],
+}
+
+E forçar o uso:
+
+<html data-theme="shops">
+
+🚀 5. Sequência Recomendada (Entrega MVP)
+
+Criar tema custom DaisyUI.
+
+Documentar tokens em um README/UI interno.
+
+Padronizar <x-app-container> para layout.
+
+Refatorar <x-card kind="product|entity">.
+
+Criar <x-empty> e <x-skeleton>.
+
+Revisar página de produto (breadcrumb + CTA fixo para contato).
+
+Revisar acessibilidade (alt dinâmico, aria-label, focus ring).

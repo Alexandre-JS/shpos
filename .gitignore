@@ -1,0 +1,84 @@
+###############################
+# Logs & Runtime Artifacts
+###############################
+*.log
+storage/logs/*
+!.gitkeep
+/.phpunit.result.cache
+/.phpunit.cache
+/.phpactor.json
+
+###############################
+# Environment / Secrets
+###############################
+.env
+.env.*.backup
+.env.backup
+.env.production
+storage/*.key
+
+###############################
+# IDE / Editors
+###############################
+.DS_Store
+Thumbs.db
+/.idea
+/.fleet
+/.vscode
+/.zed
+/.nova
+
+###############################
+# Dependencies / Build Output
+###############################
+node_modules/
+vendor/
+public/build
+public/hot
+public/storage
+bootstrap/cache/*.php
+
+###############################
+# Laravel / Framework Cache
+###############################
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/framework/testing/*
+storage/pail
+
+###############################
+# Frontend Tools
+###############################
+pnpm-lock.yaml
+yar.lock
+*.tsbuildinfo
+
+###############################
+# Misc
+###############################
+Homestead.json
+Homestead.yaml
+auth.json
+task.md
+
+###############################
+# Tailwind / CSS Artifacts
+###############################
+*.css.map
+
+###############################
+# Coverage / Reports
+###############################
+coverage/
+clover.xml
+lcov.info
+
+###############################
+# Cache / Temporary
+*.cache
+*.tmp
+~*
+*.swp
+*.swo
+
