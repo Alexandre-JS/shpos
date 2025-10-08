@@ -23,6 +23,8 @@ Route::get('/produto/{product:slug}', [ProductController::class, 'show'])->name(
 
 // Perfil público da entidade (mini-site)
 Route::get('/loja/{entity:slug}', [EntityController::class, 'show'])->name('entity.show');
+// Listagem de entidades
+Route::get('/entidades', [EntityController::class, 'index'])->name('entities.index');
 
 // Página pública de categoria
 Route::get('/categoria/{category:slug}', [\App\Http\Controllers\CategoryController::class, 'show'])->name('category.show');

@@ -22,24 +22,47 @@ class HomeController extends Controller
         $mostViewed = $this->productService->getMostViewed();
         $products = $this->productService->paginateAll();
 
-        return view('home.index', compact('recent', 'mostViewed', 'products'));
+        $categories = \App\Models\Category::active()
+            ->withCount(['products as items_count' => function ($q) {
+                $q->active();
+            }])
+            ->orderByDesc('items_count')
+            ->orderBy('name')
+            ->get();
+
+        $entities = \App\Models\Entity::active()
+            ->withCount(['products as items_count' => function ($q) {
+                $q->active();
+            }])
+            ->orderByDesc('items_count')
+            ->orderBy('name')
+            ->limit(30)
+            ->get();
+
+        return view('home.index', compact('recent', 'mostViewed', 'products', 'categories', 'entities'));
     }
 
     public function products()
     {
         $products = Product::with(['entity', 'category'])->active()->products()->paginate(24);
+        [$categories, $entities] = $this->sidebarData();
         return view('home.list', [
             'title' => 'Produtos',
-            'products' => $products
+            'products' => $products,
+            'categories' => $categories,
+            'entities' => $entities,
         ]);
     }
 
     public function services()
     {
         $products = Product::with(['entity', 'category'])->active()->services()->paginate(24);
+        [$categories, $entities] = $this->sidebarData();
         return view('home.list', [
             'title' => 'Serviços',
-            'products' => $products
+            'products' => $products,
+            'categories' => $categories,
+            'entities' => $entities,
         ]);
     }
 
@@ -78,11 +101,29 @@ class HomeController extends Controller
             ]);
         }
 
+        [$categories, $entities] = $this->sidebarData();
         return view('home.search', [
             'term' => $term,
             'results' => $results,
             'type' => $type,
             'category' => $categorySlug,
+            'categories' => $categories,
+            'entities' => $entities,
         ]);
+    }
+
+    protected function sidebarData(): array
+    {
+        $categories = \App\Models\Category::active()
+            ->withCount(['products as items_count' => function ($q) {
+                $q->active();
+            }])
+            ->orderByDesc('items_count')->orderBy('name')->get();
+        $entities = \App\Models\Entity::active()
+            ->withCount(['products as items_count' => function ($q) {
+                $q->active();
+            }])
+            ->orderByDesc('items_count')->orderBy('name')->limit(30)->get();
+        return [$categories, $entities];
     }
 }
