@@ -8,6 +8,7 @@ use App\Models\Entity;
 use App\Models\Product;
 use App\Policies\EntityPolicy;
 use App\Policies\ProductPolicy;
+use Illuminate\Support\Facades\Log;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -21,11 +22,26 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         Gate::define('manage-entity', function ($user, Entity $entity) {
-            return $entity->user_id === $user->id;
+            $allowed = $entity->user_id === $user->id;
+            Log::debug('Gate.manage-entity', [
+                'user_id' => $user->id,
+                'entity_id' => $entity->id,
+                'allowed' => $allowed,
+            ]);
+            return $allowed;
         });
 
         Gate::define('manage-product', function ($user, Product $product) {
-            return $product->entity && $product->entity->user_id === $user->id;
+            $userEntityId = $user->entity?->id;
+            $allowed = $userEntityId !== null && (int)$product->entity_id === (int)$userEntityId;
+            Log::debug('Gate.manage-product', [
+                'user_id' => $user->id,
+                'product_id' => $product->id,
+                'product_entity_id' => $product->entity_id,
+                'user_entity_id' => $userEntityId,
+                'allowed' => $allowed,
+            ]);
+            return $allowed;
         });
     }
 }

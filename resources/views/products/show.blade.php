@@ -75,8 +75,31 @@
                         <span class="text-xs text-gray-400">Views: {{ $product->views_count }}</span>
                     </div>
                     @if ($product->price)
-                        <p class="text-xl font-semibold text-green-600">MT {{ number_format($product->price, 2, ',', '.') }}
-                        </p>
+                        @php $hasDiscount = method_exists($product,'isDiscountActive') && $product->isDiscountActive(); @endphp
+                        @if ($hasDiscount)
+                            <div class="flex flex-col gap-1">
+                                <div class="flex items-baseline gap-2">
+                                    <span class="text-sm line-through text-gray-400">MT
+                                        {{ number_format($product->price, 2, ',', '.') }}</span>
+                                    <span class="text-2xl font-bold text-red-600">MT
+                                        {{ number_format($product->discountedPrice(), 2, ',', '.') }}</span>
+                                    <span
+                                        class="inline-block bg-red-100 text-red-700 text-xs font-semibold px-2 py-0.5 rounded">-{{ rtrim(rtrim(number_format($product->discountPercent(), 2, ',', '.'), '0'), ',') }}%</span>
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    Poupa MT {{ number_format($product->discountAmount(), 2, ',', '.') }}
+                                    @if ($product->discount_ends_at)
+                                        <span class="ml-2" x-data="countdown('{{ $product->discount_ends_at->toIso8601String() }}')" x-init="init()">
+                                            <span class="text-gray-400">expira em</span>
+                                            <span class="font-medium" x-text="timeLeft"></span>
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+                        @else
+                            <p class="text-xl font-semibold text-green-600">MT
+                                {{ number_format($product->price, 2, ',', '.') }}</p>
+                        @endif
                     @endif
                 </div>
                 <p class="text-gray-700 whitespace-pre-line leading-relaxed text-sm md:text-base">
@@ -167,6 +190,36 @@
                     const img = new Image();
                     img.src = src;
                     this.cache.add(src);
+                }
+            }
+        }
+
+        function countdown(iso) {
+            return {
+                target: new Date(iso),
+                timeLeft: '',
+                interval: null,
+                format(ms) {
+                    if (ms <= 0) return 'terminado';
+                    const sec = Math.floor(ms / 1000);
+                    const d = Math.floor(sec / 86400);
+                    const h = Math.floor((sec % 86400) / 3600);
+                    const m = Math.floor((sec % 3600) / 60);
+                    const s = sec % 60;
+                    if (d > 0) return `${d}d ${h}h ${m}m`;
+                    if (h > 0) return `${h}h ${m}m ${s}s`;
+                    return `${m}m ${s}s`;
+                },
+                tick() {
+                    const diff = this.target - new Date();
+                    this.timeLeft = this.format(diff);
+                    if (diff <= 0 && this.interval) {
+                        clearInterval(this.interval);
+                    }
+                },
+                init() {
+                    this.tick();
+                    this.interval = setInterval(() => this.tick(), 1000);
                 }
             }
         }

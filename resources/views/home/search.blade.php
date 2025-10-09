@@ -6,14 +6,17 @@
                 <x-sidebar-lists :categories="$categories" :entities="$entities" />
             </div>
             <div class="lg:col-span-3 order-1 lg:order-2">
-                <form @submit.prevent class="mb-4 flex gap-2">
-                    <input x-model="q" type="text" placeholder="Buscar..." class="input input-bordered w-full"
+                <form @submit.prevent class="mb-4 flex gap-2 flex-wrap items-center">
+                    <input x-model="q" type="text" placeholder="Buscar..." class="input input-bordered flex-1"
                         @input.debounce.300ms="perform()" />
                     <select x-model="type" class="select select-bordered w-40" @change="perform()">
                         <option value="">Todos</option>
                         <option value="product">Produtos</option>
                         <option value="service">Serviços</option>
                     </select>
+                    <label class="inline-flex items-center gap-2 text-sm">
+                        <input type="checkbox" x-model="promo" @change="perform()"> <span>Promoções</span>
+                    </label>
                 </form>
                 <div class="flex items-center justify-between mb-2 text-sm text-gray-500" x-show="loaded">
                     <span x-text="countText()"></span>
@@ -52,6 +55,7 @@
                 return {
                     q: @json($term),
                     type: @json($type ?? ''),
+                    promo: @json($promo ?? false),
                     results: @json(
                         $results->map(fn($p) => [
                                 'id' => $p->id,
@@ -72,7 +76,7 @@
                             return;
                         }
                         const searchUrl = @json(route('search'));
-                        fetch(`${searchUrl}?q=${encodeURIComponent(this.q)}&type=${this.type}`, {
+                        fetch(`${searchUrl}?q=${encodeURIComponent(this.q)}&type=${this.type}&promo=${this.promo ? 1 : 0}`, {
                                 headers: {
                                     'Accept': 'application/json'
                                 }

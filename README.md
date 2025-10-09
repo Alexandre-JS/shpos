@@ -11,13 +11,13 @@
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+-   [Simple, fast routing engine](https://laravel.com/docs/routing).
+-   [Powerful dependency injection container](https://laravel.com/docs/container).
+-   Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+-   Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+-   Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+-   [Robust background job processing](https://laravel.com/docs/queues).
+-   [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
@@ -35,14 +35,14 @@ We would like to extend our thanks to the following sponsors for funding Laravel
 
 ### Premium Partners
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+-   **[Vehikl](https://vehikl.com)**
+-   **[Tighten Co.](https://tighten.co)**
+-   **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
+-   **[64 Robots](https://64robots.com)**
+-   **[Curotec](https://www.curotec.com/services/technologies/laravel)**
+-   **[DevSquad](https://devsquad.com/hire-laravel-developers)**
+-   **[Redberry](https://redberry.international/laravel-development)**
+-   **[Active Logic](https://activelogic.com)**
 
 ## Contributing
 
@@ -59,3 +59,48 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+---
+
+## Funcionalidade de Descontos (Custom)
+
+Campos adicionados à tabela `products`:
+
+-   `discount_type` (`percent` | `amount`, nullable)
+-   `discount_value` (decimal, nullable)
+-   `discount_starts_at` (timestamp, nullable)
+-   `discount_ends_at` (timestamp, nullable)
+
+Condições para um desconto estar ativo:
+
+1. `discount_type` não nulo
+2. `discount_value > 0`
+3. (`discount_starts_at` é nulo ou agora >= `discount_starts_at`)
+4. (`discount_ends_at` é nulo ou agora <= `discount_ends_at`)
+5. `price` > 0
+
+Métodos de apoio no model `Product`:
+
+-   `isDiscountActive()`
+-   `discountAmount()`
+-   `discountedPrice()`
+-   `discountPercent()`
+-   Atributo acessor: `$product->final_price` (mesmo valor de `discountedPrice()`)
+
+Regras de cálculo:
+
+-   Percent: `discountAmount = price * (percent / 100)` (limitado a 100%)
+-   Amount: `discountAmount = min(discount_value, price)`
+-   `discountedPrice = max(price - discountAmount, 0)`
+-   Percent derivado para amount: `(discountAmount / price) * 100`
+
+Scope disponível: `Product::withActiveDiscount()`
+
+UI:
+
+-   Cartões de produto exibem preço original riscado, preço final, badge com percentagem e texto de poupança.
+-   Página de detalhe mostra também data limite quando existe `discount_ends_at`.
+
+Testes: `tests/Unit/ProductDiscountTest.php` cobre percent, valor fixo, janela e limites.
+
+Nota: Para bases SQLite (ambiente de teste), o `ProductObserver` usa lógica condicional sem função `GREATEST`; em MySQL usa `GREATEST` para atualização atomizada.

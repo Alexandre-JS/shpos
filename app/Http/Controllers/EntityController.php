@@ -18,12 +18,7 @@ class EntityController extends Controller
         }
         switch ($sort) {
             case 'recent':
-                // Ordena por última criação de produto ativo (usa subquery de max created_at)
-                $entitiesQuery->addSelect([
-                    'last_item_at' => \App\Models\Product::selectRaw('MAX(created_at)')
-                        ->whereColumn('entity_id', 'entities.id')
-                        ->where('is_active', true)
-                ])->orderByDesc('last_item_at')->orderBy('name');
+                $entitiesQuery->orderByDesc('last_item_at')->orderBy('name');
                 break;
             case 'nome':
                 $entitiesQuery->orderBy('name');

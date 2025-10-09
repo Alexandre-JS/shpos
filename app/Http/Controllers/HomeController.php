@@ -19,6 +19,12 @@ class HomeController extends Controller
         }
 
         $recent = $this->productService->getRecent();
+        $discounted = Product::with(['entity', 'category'])
+            ->active()
+            ->withActiveDiscount()
+            ->orderByDesc('discount_ends_at')
+            ->limit(12)
+            ->get();
         $mostViewed = $this->productService->getMostViewed();
         $products = $this->productService->paginateAll();
 
@@ -39,30 +45,40 @@ class HomeController extends Controller
             ->limit(30)
             ->get();
 
-        return view('home.index', compact('recent', 'mostViewed', 'products', 'categories', 'entities'));
+        return view('home.index', compact('recent', 'discounted', 'mostViewed', 'products', 'categories', 'entities'));
     }
 
     public function products()
     {
-        $products = Product::with(['entity', 'category'])->active()->products()->paginate(24);
+        $query = Product::with(['entity', 'category'])->active()->products();
+        if (request()->boolean('promo')) {
+            $query->withActiveDiscount();
+        }
+        $products = $query->paginate(24)->withQueryString();
         [$categories, $entities] = $this->sidebarData();
         return view('home.list', [
             'title' => 'Produtos',
             'products' => $products,
             'categories' => $categories,
             'entities' => $entities,
+            'promo' => request()->boolean('promo'),
         ]);
     }
 
     public function services()
     {
-        $products = Product::with(['entity', 'category'])->active()->services()->paginate(24);
+        $query = Product::with(['entity', 'category'])->active()->services();
+        if (request()->boolean('promo')) {
+            $query->withActiveDiscount();
+        }
+        $products = $query->paginate(24)->withQueryString();
         [$categories, $entities] = $this->sidebarData();
         return view('home.list', [
             'title' => 'Serviços',
             'products' => $products,
             'categories' => $categories,
             'entities' => $entities,
+            'promo' => request()->boolean('promo'),
         ]);
     }
 
@@ -73,6 +89,11 @@ class HomeController extends Controller
         $categorySlug = $request->get('cat');
 
         $results = $this->productService->search($term, $type, $categorySlug);
+
+        // Filtro de promoções (após busca em coleção). Se performance for um problema, mover lógica para ProductService.
+        if ($request->boolean('promo')) {
+            $results = $results->filter(fn($p) => method_exists($p, 'isDiscountActive') && $p->isDiscountActive())->values();
+        }
 
         if ($request->wantsJson()) {
             return response()->json([
@@ -98,6 +119,7 @@ class HomeController extends Controller
                 'term' => $term,
                 'type' => $type,
                 'category' => $categorySlug,
+                'promo' => $request->boolean('promo'),
             ]);
         }
 
@@ -109,6 +131,7 @@ class HomeController extends Controller
             'category' => $categorySlug,
             'categories' => $categories,
             'entities' => $entities,
+            'promo' => $request->boolean('promo'),
         ]);
     }
 

@@ -31,6 +31,30 @@ use Illuminate\Support\Str;
             @if ($product->is_featured ?? false)
                 <span class="badge badge-primary badge-xs">Destaque</span>
             @endif
+            @php
+                $showExpire = false;
+                $expireLabel = null;
+                if (
+                    method_exists($product, 'isDiscountActive') &&
+                    $product->isDiscountActive() &&
+                    $product->discount_ends_at
+                ) {
+                    $diffSec = $product->discount_ends_at->diffInSeconds(now(), false);
+                    if ($diffSec > 0) {
+                        // future
+                        $hours = $product->discount_ends_at->diffInHours();
+                        if ($hours < 48) {
+                            $showExpire = true;
+                            $expireLabel =
+                                'Expira em ' .
+                                ($hours >= 1 ? $hours . 'h' : $product->discount_ends_at->diffInMinutes() . 'm');
+                        }
+                    }
+                }
+            @endphp
+            @if ($showExpire)
+                <span class="badge badge-error badge-xs">{{ $expireLabel }}</span>
+            @endif
         </div>
     </a>
 
@@ -53,9 +77,29 @@ use Illuminate\Support\Str;
         <div class="mt-3 flex items-end justify-between">
             <div class="space-y-0.5">
                 @if (!is_null($product->price))
-                    <div class="font-semibold text-sm">
-                        {{ number_format($product->price, 2, ',', '.') }} MT
-                    </div>
+                    @php
+                        $hasDiscount = method_exists($product, 'isDiscountActive') && $product->isDiscountActive();
+                    @endphp
+                    @if ($hasDiscount)
+                        <div class="flex items-baseline gap-1">
+                            <span
+                                class="text-xs line-through text-gray-400">{{ number_format($product->price, 2, ',', '.') }}
+                                MT</span>
+                            <span
+                                class="font-semibold text-sm text-red-600">{{ number_format($product->discountedPrice(), 2, ',', '.') }}
+                                MT</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <span
+                                class="inline-block bg-red-100 text-red-700 text-[10px] font-semibold px-1.5 py-0.5 rounded">-{{ rtrim(rtrim(number_format($product->discountPercent(), 2, ',', '.'), '0'), ',') }}%</span>
+                            <span class="text-[10px] text-gray-500">Poupa
+                                {{ number_format($product->discountAmount(), 2, ',', '.') }} MT</span>
+                        </div>
+                    @else
+                        <div class="font-semibold text-sm">
+                            {{ number_format($product->price, 2, ',', '.') }} MT
+                        </div>
+                    @endif
                 @endif
                 @if ($product->views_count ?? false)
                     <div class="text-[10px] text-gray-500">{{ $product->views_count }} visualizações</div>

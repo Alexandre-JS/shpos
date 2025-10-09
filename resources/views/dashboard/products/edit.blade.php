@@ -46,6 +46,44 @@
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                     @enderror
                 </div>
+                <div>
+                    <label class="block text-xs font-medium mb-1">Tipo de Desconto</label>
+                    <select name="discount_type" class="w-full border rounded px-3 py-2 text-sm">
+                        <option value="">-- Nenhum --</option>
+                        <option value="percent" @selected(old('discount_type', $product->discount_type) === 'percent')>Percentual (%)</option>
+                        <option value="amount" @selected(old('discount_type', $product->discount_type) === 'amount')>Valor Fixo</option>
+                    </select>
+                    @error('discount_type')
+                        <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div>
+                    <label class="block text-xs font-medium mb-1">Valor do Desconto</label>
+                    <input name="discount_value" value="{{ old('discount_value', $product->discount_value) }}"
+                        type="number" step="0.01" min="0" class="w-full border rounded px-3 py-2 text-sm" />
+                    <p class="text-[10px] text-gray-500">Percent: 0-100. Valor: mesma moeda do preço.</p>
+                    @error('discount_value')
+                        <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div>
+                    <label class="block text-xs font-medium mb-1">Início do Desconto</label>
+                    <input name="discount_starts_at"
+                        value="{{ old('discount_starts_at', optional($product->discount_starts_at)->format('Y-m-d\TH:i')) }}"
+                        type="datetime-local" class="w-full border rounded px-3 py-2 text-sm" />
+                    @error('discount_starts_at')
+                        <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div>
+                    <label class="block text-xs font-medium mb-1">Fim do Desconto</label>
+                    <input name="discount_ends_at"
+                        value="{{ old('discount_ends_at', optional($product->discount_ends_at)->format('Y-m-d\TH:i')) }}"
+                        type="datetime-local" class="w-full border rounded px-3 py-2 text-sm" />
+                    @error('discount_ends_at')
+                        <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
             </div>
             <div>
                 <label class="block text-xs font-medium mb-1">Descrição</label>
@@ -54,12 +92,21 @@
                     <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                 @enderror
             </div>
-            <div class="space-y-4" x-data="multiImagesEdit({ existing: @json(
-                $product->images->map(fn($im) => [
+            @php
+                $existingImages = $product->images->map(function ($im) {
+                    return [
                         'id' => $im->id,
                         'path' => asset($im->path),
                         'is_primary' => $im->is_primary,
-                    ])), reorderUrl: '{{ route('dashboard.products.images.reorder', $product) }}', csrf: '{{ csrf_token() }}' })">
+                    ];
+                });
+            @endphp
+            <div class="space-y-4"
+                x-data='multiImagesEdit({
+                    existing: @json($existingImages),
+                    reorderUrl: "{{ route('dashboard.products.images.reorder', $product) }}",
+                    csrf: "{{ csrf_token() }}"
+                })'>
                 <div>
                     <label class="block text-xs font-medium mb-1">Imagens atuais</label>
                     <template x-if="existing.length">

@@ -6,6 +6,13 @@
                 <x-sidebar-lists :categories="$categories" :entities="$entities" />
             </div>
             <div class="lg:col-span-3 order-1 lg:order-2 space-y-10">
+                @if (isset($discounted) && $discounted->isNotEmpty())
+                    <section>
+                        <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">Em Promoção <span
+                                class="text-xs font-normal text-red-600">Descontos ativos</span></h2>
+                        @include('partials.product-grid', ['items' => $discounted])
+                    </section>
+                @endif
                 <section>
                     <h2 class="text-xl font-semibold mb-4">Recentemente Adicionados</h2>
                     @include('partials.product-grid', ['items' => $recent])

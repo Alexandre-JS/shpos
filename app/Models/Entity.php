@@ -33,6 +33,7 @@ class Entity extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'is_featured' => 'boolean',
+        'last_item_at' => 'datetime',
     ];
 
     // Normaliza número de WhatsApp ao definir (remove não dígitos, garante prefixo 258 se faltar e tamanho padrão)

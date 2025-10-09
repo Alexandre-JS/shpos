@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use App\Services\SlugGeneratorService;
 use App\Services\ImageUploadService;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 
 class ProductManagementController extends Controller
 {
@@ -19,6 +20,12 @@ class ProductManagementController extends Controller
     {
         $entity = $request->user()->entity;
         if (!$entity) return redirect()->route('home');
+
+        Log::debug('ProductManagementController.index', [
+            'user_id' => $request->user()->id,
+            'entity_id' => $entity->id,
+            'filters' => $request->only(['type', 'q'])
+        ]);
 
         $query = $entity->products()->with('category')->latest();
         if ($request->filled('type')) {
@@ -39,6 +46,10 @@ class ProductManagementController extends Controller
     {
         $entity = $request->user()->entity;
         if (!$entity) return redirect()->route('home');
+        Log::debug('ProductManagementController.create', [
+            'user_id' => $request->user()->id,
+            'entity_id' => $entity->id,
+        ]);
         $categories = Category::orderBy('name')->get();
         return view('dashboard.products.create', compact('categories'));
     }
@@ -47,6 +58,12 @@ class ProductManagementController extends Controller
     {
         $entity = $request->user()->entity;
         if (!$entity) return redirect()->route('home');
+
+        Log::debug('ProductManagementController.store:start', [
+            'user_id' => $request->user()->id,
+            'entity_id' => $entity->id,
+            'payload' => $request->only(['name', 'type', 'price', 'discount_type', 'discount_value'])
+        ]);
 
         $data = $request->validated();
         $imagesFiles = $request->file('images', []);
@@ -64,6 +81,10 @@ class ProductManagementController extends Controller
 
             /** @var Product $product */
             $product = Product::create($data);
+            Log::debug('ProductManagementController.store:created', [
+                'product_id' => $product->id,
+                'entity_id' => $entity->id,
+            ]);
 
             if ($imagesFiles) {
                 foreach ($imagesFiles as $idx => $file) {
@@ -89,7 +110,20 @@ class ProductManagementController extends Controller
 
     protected function authorizeProduct(Request $request, Product $product)
     {
-        if (! Gate::allows('manage-product', $product)) {
+        $userEntityId = $request->user()->entity?->id;
+        $allowed = $userEntityId !== null && (int)$product->entity_id === (int)$userEntityId;
+        Log::debug('ProductManagementController.authorizeProduct', [
+            'user_id' => $request->user()->id,
+            'product_id' => $product->id,
+            'product_entity_id' => $product->entity_id,
+            'user_entity_id' => $userEntityId,
+            'allowed' => $allowed,
+        ]);
+        if (! $allowed) {
+            Log::warning('ProductManagementController.authorizeProduct:denied', [
+                'user_id' => $request->user()->id,
+                'product_id' => $product->id,
+            ]);
             abort(403, 'Não autorizado.');
         }
         return $request->user()->entity;
@@ -98,6 +132,10 @@ class ProductManagementController extends Controller
     public function edit(Request $request, Product $product)
     {
         $this->authorizeProduct($request, $product);
+        Log::debug('ProductManagementController.edit', [
+            'user_id' => $request->user()->id,
+            'product_id' => $product->id,
+        ]);
         $categories = Category::orderBy('name')->get();
         return view('dashboard.products.edit', compact('product', 'categories'));
     }
@@ -106,6 +144,11 @@ class ProductManagementController extends Controller
     {
         $this->authorizeProduct($request, $product);
         $data = $request->validated();
+        Log::debug('ProductManagementController.update:start', [
+            'user_id' => $request->user()->id,
+            'product_id' => $product->id,
+            'changes' => collect($data)->only(['name', 'price', 'type', 'discount_type', 'discount_value', 'discount_starts_at', 'discount_ends_at', 'is_active'])->toArray()
+        ]);
 
         $newImages = $request->file('images', []);
         $primaryIndex = $data['primary_image_index'] ?? null;
@@ -120,6 +163,9 @@ class ProductManagementController extends Controller
 
             $data['is_active'] = $data['is_active'] ?? false;
             $product->update($data);
+            Log::debug('ProductManagementController.update:updated', [
+                'product_id' => $product->id,
+            ]);
 
             // Append new images
             if ($newImages) {
@@ -166,6 +212,10 @@ class ProductManagementController extends Controller
     public function destroy(Request $request, Product $product)
     {
         $this->authorizeProduct($request, $product);
+        Log::debug('ProductManagementController.destroy', [
+            'user_id' => $request->user()->id,
+            'product_id' => $product->id,
+        ]);
         $product->delete();
         return redirect()->route('dashboard.products.index')->with('success', 'Removido.');
     }
@@ -176,6 +226,10 @@ class ProductManagementController extends Controller
         if ($image->product_id !== $product->id) {
             abort(404);
         }
+        Log::debug('ProductManagementController.setPrimaryImage', [
+            'product_id' => $product->id,
+            'image_id' => $image->id,
+        ]);
         $product->images()->update(['is_primary' => false]);
         $image->update(['is_primary' => true]);
         return back()->with('success', 'Imagem principal atualizada.');
@@ -188,15 +242,25 @@ class ProductManagementController extends Controller
             'order' => 'required|array',
             'order.*' => 'integer|exists:product_images,id'
         ]);
+        Log::debug('ProductManagementController.reorderImages:start', [
+            'product_id' => $product->id,
+            'ids' => $data['order'],
+        ]);
         $ids = $data['order'];
         // Garantir que todos pertencem ao produto
         $images = $product->images()->whereIn('id', $ids)->get();
         if ($images->count() !== count($ids)) {
+            Log::warning('ProductManagementController.reorderImages:invalid-images', [
+                'product_id' => $product->id,
+            ]);
             return response()->json(['message' => 'Imagens inválidas'], 422);
         }
         foreach ($ids as $pos => $id) {
             $product->images()->where('id', $id)->update(['position' => $pos]);
         }
+        Log::debug('ProductManagementController.reorderImages:done', [
+            'product_id' => $product->id,
+        ]);
         return response()->json(['message' => 'Ordem atualizada']);
     }
 }
