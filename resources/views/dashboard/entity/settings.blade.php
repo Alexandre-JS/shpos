@@ -5,6 +5,11 @@
     <div class="max-w-4xl space-y-6">
         <form action="{{ route('dashboard.entity.settings.update') }}" method="POST" enctype="multipart/form-data"
             class="bg-white border rounded p-6 space-y-6">
+            @if (session('success'))
+                <div class="rounded border border-green-300 bg-green-50 px-3 py-2 text-xs text-green-800">
+                    {{ session('success') }}
+                </div>
+            @endif
             @csrf
             @method('PUT')
             <div class="grid md:grid-cols-2 gap-6">
@@ -57,32 +62,6 @@
                 @error('description')
                     <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                 @enderror
-            </div>
-            <div class="grid md:grid-cols-3 gap-6">
-                <div>
-                    <label class="block text-xs font-medium mb-1">Instagram URL</label>
-                    <input name="instagram_url" value="{{ old('instagram_url', $entity->instagram_url) }}"
-                        class="w-full border rounded px-3 py-2 text-sm" />
-                    @error('instagram_url')
-                        <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-                <div>
-                    <label class="block text-xs font-medium mb-1">Facebook URL</label>
-                    <input name="facebook_url" value="{{ old('facebook_url', $entity->facebook_url) }}"
-                        class="w-full border rounded px-3 py-2 text-sm" />
-                    @error('facebook_url')
-                        <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-                <div>
-                    <label class="block text-xs font-medium mb-1">Website URL</label>
-                    <input name="website_url" value="{{ old('website_url', $entity->website_url) }}"
-                        class="w-full border rounded px-3 py-2 text-sm" />
-                    @error('website_url')
-                        <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
             </div>
             <div class="grid md:grid-cols-3 gap-6">
                 <div>

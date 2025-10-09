@@ -62,7 +62,30 @@
                 <div class="text-xs text-gray-500 hidden sm:block">Olá, {{ auth()->user()->name ?? 'Utilizador' }}</div>
             </div>
         </header>
-        <main class="flex-1 px-4 sm:px-6 py-6 space-y-8">@yield('content')</main>
+        <main class="flex-1 px-4 sm:px-6 py-6 space-y-8">
+            @if (session('success'))
+                <div
+                    class="rounded-md border border-green-300 bg-green-50 px-4 py-3 text-sm text-green-800 flex items-start gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mt-0.5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <div>{{ session('success') }}</div>
+                </div>
+            @endif
+            @if (session('error'))
+                <div
+                    class="rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700 flex items-start gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mt-0.5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>{{ session('error') }}</div>
+                </div>
+            @endif
+            @yield('content')
+        </main>
     </div>
     @stack('scripts')
 </body>
