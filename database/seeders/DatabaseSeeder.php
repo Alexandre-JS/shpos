@@ -14,10 +14,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Usuário de teste
+        // Admin da plataforma (desenvolvimento)
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name'     => 'Admin',
+            'email'    => 'admin@plataforma.com',
+            'password' => bcrypt('123456'),
+            'is_admin' => true,
         ]);
 
         // Categorias iniciais

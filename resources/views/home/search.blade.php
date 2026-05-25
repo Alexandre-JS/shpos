@@ -1,4 +1,6 @@
 @extends('layouts.app')
+@section('title', $term ? "Resultados para \"{$term}\"" : 'Pesquisa')
+@section('meta_description', $term ? "Resultados de pesquisa para \"{$term}\" em " . config('app.name', 'Vitrine') . '.' : 'Pesquise produtos e serviços.')
 @section('content')
     <x-app-container x-data="searchPage()">
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">

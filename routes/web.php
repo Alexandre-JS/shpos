@@ -3,12 +3,17 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\EntityController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\ProductManagementController;
 use App\Http\Controllers\Dashboard\EntitySettingsController;
+use App\Http\Controllers\Admin\EntityApprovalController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 
 // Home (listagens públicas agregadas)
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -36,6 +41,12 @@ Route::middleware('guest')->group(function () {
 
     Route::get('/login', [LoginController::class, 'show'])->name('login.show');
     Route::post('/login', [LoginController::class, 'login'])->name('login.perform');
+
+    // Recuperação de password
+    Route::get('/password/forgot', [ForgotPasswordController::class, 'show'])->name('password.request');
+    Route::post('/password/forgot', [ForgotPasswordController::class, 'send'])->name('password.send');
+    Route::get('/password/reset/{token}', [ResetPasswordController::class, 'show'])->name('password.reset');
+    Route::post('/password/reset', [ResetPasswordController::class, 'update'])->name('password.update');
 });
 
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
@@ -60,4 +71,27 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureEntityOwner::class])->pref
 
     // Estatísticas
     Route::get('/estatisticas', [\App\Http\Controllers\Dashboard\StatsController::class, 'index'])->name('stats');
+});
+
+// Área de administração
+Route::middleware(['auth', \App\Http\Middleware\EnsureAdmin::class])->prefix('admin')->as('admin.')->group(function () {
+    Route::get('/',                                           [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    // Gestão de empresas
+    Route::get('/entidades',                                  [EntityApprovalController::class, 'index'])->name('entities.index');
+    Route::get('/entidades/{entity}/editar',                  [EntityApprovalController::class, 'edit'])->name('entities.edit');
+    Route::put('/entidades/{entity}',                         [EntityApprovalController::class, 'update'])->name('entities.update');
+    Route::put('/entidades/{entity}/aprovar',                 [EntityApprovalController::class, 'approve'])->name('entities.approve');
+    Route::put('/entidades/{entity}/rejeitar',                [EntityApprovalController::class, 'reject'])->name('entities.reject');
+    Route::put('/entidades/{entity}/toggle',                  [EntityApprovalController::class, 'toggleActive'])->name('entities.toggle');
+    Route::delete('/entidades/{entity}',                      [EntityApprovalController::class, 'destroy'])->name('entities.destroy');
+
+    // Gestão de categorias
+    Route::get('/categorias',                                 [AdminCategoryController::class, 'index'])->name('categories.index');
+    Route::get('/categorias/nova',                            [AdminCategoryController::class, 'create'])->name('categories.create');
+    Route::post('/categorias',                                [AdminCategoryController::class, 'store'])->name('categories.store');
+    Route::get('/categorias/{category}/editar',               [AdminCategoryController::class, 'edit'])->name('categories.edit');
+    Route::put('/categorias/{category}',                      [AdminCategoryController::class, 'update'])->name('categories.update');
+    Route::put('/categorias/{category}/toggle',               [AdminCategoryController::class, 'toggleActive'])->name('categories.toggle');
+    Route::delete('/categorias/{category}',                   [AdminCategoryController::class, 'destroy'])->name('categories.destroy');
 });

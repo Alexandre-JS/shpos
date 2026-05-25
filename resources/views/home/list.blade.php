@@ -1,4 +1,6 @@
 @extends('layouts.app')
+@section('title', $title ?? 'Produtos e Serviços')
+@section('meta_description', 'Explore ' . strtolower($title ?? 'produtos e serviços') . ' de empresas moçambicanas em ' . config('app.name', 'Vitrine') . '.')
 @section('content')
     <x-app-container>
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">

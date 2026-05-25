@@ -4,7 +4,35 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@yield('title', 'Plataforma')</title>
+
+    @php
+        $seoTitle       = trim(strip_tags($__env->yieldContent('title', '')));
+        $appName        = config('app.name', 'Vitrine');
+        $fullTitle      = $seoTitle ? "{$seoTitle} — {$appName}" : $appName;
+        $metaDesc       = trim(strip_tags($__env->yieldContent('meta_description', "Descubra produtos e serviços de empresas moçambicanas em {$appName}.")));
+        $ogImage        = trim($__env->yieldContent('og_image', asset('images/og-default.png')));
+        $ogType         = trim($__env->yieldContent('og_type', 'website'));
+    @endphp
+
+    <title>{{ $fullTitle }}</title>
+    <meta name="description" content="{{ $metaDesc }}" />
+
+    {{-- Open Graph (WhatsApp, Facebook) --}}
+    <meta property="og:title"       content="{{ $fullTitle }}" />
+    <meta property="og:description" content="{{ $metaDesc }}" />
+    <meta property="og:image"       content="{{ $ogImage }}" />
+    <meta property="og:url"         content="{{ url()->current() }}" />
+    <meta property="og:type"        content="{{ $ogType }}" />
+    <meta property="og:site_name"   content="{{ $appName }}" />
+    <meta property="og:locale"      content="pt_MZ" />
+
+    {{-- Twitter Card --}}
+    <meta name="twitter:card"        content="summary_large_image" />
+    <meta name="twitter:title"       content="{{ $fullTitle }}" />
+    <meta name="twitter:description" content="{{ $metaDesc }}" />
+    <meta name="twitter:image"       content="{{ $ogImage }}" />
+
+    @stack('meta')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('preload')
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -71,9 +99,16 @@
 
     <main class="px-3 sm:px-4">
         @if (session('success'))
-            <div class="max-w-3xl mx-auto mb-4 bg-green-100 text-green-700 p-3 rounded text-sm">
-                {{ session('success') }}
-            </div>
+            <div class="max-w-3xl mx-auto mb-4 bg-green-100 text-green-700 p-3 rounded text-sm">{{ session('success') }}</div>
+        @endif
+        @if (session('info'))
+            <div class="max-w-3xl mx-auto mb-4 bg-blue-50 border border-blue-200 text-blue-800 p-3 rounded text-sm">{{ session('info') }}</div>
+        @endif
+        @if (session('warning'))
+            <div class="max-w-3xl mx-auto mb-4 bg-yellow-50 border border-yellow-200 text-yellow-800 p-3 rounded text-sm">{{ session('warning') }}</div>
+        @endif
+        @if (session('error'))
+            <div class="max-w-3xl mx-auto mb-4 bg-red-100 text-red-700 p-3 rounded text-sm">{{ session('error') }}</div>
         @endif
         @yield('content')
     </main>

@@ -30,6 +30,9 @@
                 <a href="{{ route('register.show') }}" class="link link-primary">Criar conta</a>
                 <button class="btn btn-primary">Entrar</button>
             </div>
+            <div class="text-center text-sm">
+                <a href="{{ route('password.request') }}" class="text-gray-500 hover:underline">Esqueci a password</a>
+            </div>
         </form>
     </div>
 @endsection

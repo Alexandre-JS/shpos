@@ -1,5 +1,6 @@
 @extends('layouts.app')
-@section('title', 'Entidades')
+@section('title', 'Empresas e Lojas')
+@section('meta_description', 'Explore todas as empresas e lojas registadas em ' . config('app.name', 'Vitrine') . '. Encontre um negócio perto de si.')
 @section('content')
     <x-app-container>
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">

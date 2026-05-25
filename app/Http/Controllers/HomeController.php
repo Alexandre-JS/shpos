@@ -13,9 +13,10 @@ class HomeController extends Controller
 
     public function index()
     {
-        // Se autenticado, direciona diretamente para o dashboard (experiência focada no gestor)
         if (Auth::check()) {
-            return redirect()->route('dashboard.index');
+            return Auth::user()->is_admin
+                ? redirect()->route('admin.dashboard')
+                : redirect()->route('dashboard.index');
         }
 
         $recent = $this->productService->getRecent();

@@ -21,8 +21,22 @@ class LoginController extends Controller
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $user   = Auth::user();
+            $entity = $user->entity;
+
+            // Loja desactivada pelo admin
+            if (!$user->is_admin && $entity && $entity->isApproved() && !$entity->is_active) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return back()->withErrors([
+                    'email' => 'A tua loja foi temporariamente desactivada. Contacta o suporte para mais informações.',
+                ])->onlyInput('email');
+            }
+
             $request->session()->regenerate();
-            return redirect()->intended(route('home'));
+            $destination = $user->is_admin ? route('admin.dashboard') : route('dashboard.index');
+            return redirect()->intended($destination);
         }
 
         return back()->withErrors([

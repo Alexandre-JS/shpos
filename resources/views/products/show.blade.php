@@ -1,5 +1,20 @@
 @extends('layouts.app')
 @section('title', $product->name)
+@section('meta_description', \Illuminate\Support\Str::limit(strip_tags($product->description), 160))
+@section('og_type', 'product')
+@push('meta')
+    @php
+        $primaryImg = $product->primaryImage();
+        $ogImg = $primaryImg
+            ? asset('storage/' . ltrim(str_replace('storage/', '', $primaryImg->path), '/'))
+            : ($product->image_path ? asset($product->image_path) : asset('images/og-default.png'));
+    @endphp
+    <meta property="og:image" content="{{ $ogImg }}" />
+    @if($product->price)
+        <meta property="product:price:amount"   content="{{ $product->discountedPrice() }}" />
+        <meta property="product:price:currency" content="MZN" />
+    @endif
+@endpush
 @section('content')
     <x-app-container class="max-w-5xl space-y-8">
         <div class="space-y-4">

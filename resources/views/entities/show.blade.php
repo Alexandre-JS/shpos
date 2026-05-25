@@ -1,5 +1,11 @@
 @extends('layouts.app')
 @section('title', $entity->name)
+@section('meta_description', \Illuminate\Support\Str::limit(strip_tags($entity->description), 160))
+@push('meta')
+    @if($entity->logo_path)
+        <meta property="og:image" content="{{ asset($entity->logo_path) }}" />
+    @endif
+@endpush
 @section('content')
     <x-app-container class="space-y-8">
         <header class="space-y-4">

@@ -87,7 +87,7 @@
             </div>
             <div>
                 <label class="block text-xs font-medium mb-1">Descrição</label>
-                <textarea name="description" rows="5" class="w-full border rounded px-3 py-2 text-sm">{{ old('description', $product->description) }}</textarea>
+                <textarea name="description" rows="5" required class="w-full border rounded px-3 py-2 text-sm">{{ old('description', $product->description) }}</textarea>
                 @error('description')
                     <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                 @enderror

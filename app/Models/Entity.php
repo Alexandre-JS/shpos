@@ -28,13 +28,22 @@ class Entity extends Model
         'is_active',
         'is_featured',
         'plan_type',
+        'status',
     ];
 
+    const STATUS_PENDING  = 'pending';
+    const STATUS_APPROVED = 'approved';
+    const STATUS_REJECTED = 'rejected';
+
     protected $casts = [
-        'is_active' => 'boolean',
+        'is_active'  => 'boolean',
         'is_featured' => 'boolean',
         'last_item_at' => 'datetime',
     ];
+
+    public function isPending(): bool  { return $this->status === self::STATUS_PENDING; }
+    public function isApproved(): bool { return $this->status === self::STATUS_APPROVED; }
+    public function isRejected(): bool { return $this->status === self::STATUS_REJECTED; }
 
     // Normaliza número de WhatsApp ao definir (remove não dígitos, garante prefixo 258 se faltar e tamanho padrão)
     public function setWhatsappAttribute($value): void
@@ -81,7 +90,12 @@ class Entity extends Model
     // Scopes
     public function scopeActive($query)
     {
-        return $query->where('is_active', true);
+        return $query->where('is_active', true)->where('status', self::STATUS_APPROVED);
+    }
+
+    public function scopeApproved($query)
+    {
+        return $query->where('status', self::STATUS_APPROVED);
     }
 
     public function scopeFeatured($query)

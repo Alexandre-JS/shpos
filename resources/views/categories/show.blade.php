@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('title', $category->name)
+@section('meta_description', 'Explore produtos e serviços na categoria ' . $category->name . ' em ' . config('app.name', 'Vitrine') . '.')
 @section('content')
     <x-app-container class="space-y-8">
         <header class="space-y-2">

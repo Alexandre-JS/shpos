@@ -38,25 +38,27 @@ class RegisterController extends Controller
             }
 
             Entity::create([
-                'user_id' => $user->id,
-                'name' => $data['entity_name'],
-                'slug' => $slug,
-                'description' => $data['entity_description'],
-                'location_city' => $data['location_city'],
+                'user_id'           => $user->id,
+                'name'              => $data['entity_name'],
+                'slug'              => $slug,
+                'description'       => $data['entity_description'],
+                'location_city'     => $data['location_city'],
                 'location_district' => $data['location_district'] ?? null,
-                'phone' => $data['phone'] ?? null,
-                'whatsapp' => $data['whatsapp'],
-                'email' => $data['entity_email'] ?? null,
-                'facebook_url' => $data['facebook_url'] ?? null,
-                'instagram_url' => $data['instagram_url'] ?? null,
-                'website_url' => $data['website_url'] ?? null,
+                'phone'             => $data['phone'] ?? null,
+                'whatsapp'          => $data['whatsapp'],
+                'email'             => $data['entity_email'] ?? null,
+                'facebook_url'      => $data['facebook_url'] ?? null,
+                'instagram_url'     => $data['instagram_url'] ?? null,
+                'website_url'       => $data['website_url'] ?? null,
+                'status'            => 'pending',
             ]);
 
             Auth::login($user);
             DB::commit();
 
-            return redirect()->route('home')->with('success', 'Conta e entidade criadas com sucesso!');
-        } catch (\Throwable $e) {
+            return redirect()->route('dashboard.index')
+                ->with('info', 'Conta criada! O teu registo está a aguardar aprovação. Receberás uma notificação quando estiver activo.');
+        } catch (\Throwable) {
             DB::rollBack();
             return back()->withErrors(['general' => 'Erro ao registrar.'])->withInput();
         }

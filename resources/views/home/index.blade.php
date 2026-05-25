@@ -1,4 +1,6 @@
 @extends('layouts.app')
+@section('title', config('app.name', 'Vitrine'))
+@section('meta_description', 'Descubra produtos e serviços de empresas moçambicanas. Encontre o que procura e contacte directamente o vendedor.')
 @section('content')
     <x-app-container>
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
