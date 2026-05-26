@@ -14,6 +14,9 @@ use App\Http\Controllers\Dashboard\EntitySettingsController;
 use App\Http\Controllers\Admin\EntityApprovalController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\DeliveryPartnerController;
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\Auth\EmailVerificationController;
 
 // Home (listagens públicas agregadas)
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -34,6 +37,13 @@ Route::get('/entidades', [EntityController::class, 'index'])->name('entities.ind
 // Página pública de categoria
 Route::get('/categoria/{category:slug}', [\App\Http\Controllers\CategoryController::class, 'show'])->name('category.show');
 
+// Páginas estáticas / institucionais
+Route::get('/sobre', [PageController::class, 'about'])->name('about');
+Route::get('/contacto', [PageController::class, 'contact'])->name('contact');
+Route::get('/termos', [PageController::class, 'terms'])->name('terms');
+Route::get('/privacidade', [PageController::class, 'privacy'])->name('privacy');
+Route::get('/parceiros-de-entrega', [PageController::class, 'deliveryPartners'])->name('delivery-partners');
+
 // Registro de entidade + usuário (UC01)
 Route::middleware('guest')->group(function () {
     Route::get('/register', [RegisterController::class, 'show'])->name('register.show');
@@ -51,8 +61,19 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
 
-// Dashboard (autenticado)
-Route::middleware(['auth', \App\Http\Middleware\EnsureEntityOwner::class])->prefix('dashboard')->as('dashboard.')->group(function () {
+// Verificação de email
+Route::middleware('auth')->group(function () {
+    Route::get('/email/verify', [EmailVerificationController::class, 'notice'])->name('verification.notice');
+    Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('verification.verify');
+    Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])
+        ->middleware('throttle:6,1')
+        ->name('verification.send');
+});
+
+// Dashboard (autenticado + email verificado)
+Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureEntityOwner::class])->prefix('dashboard')->as('dashboard.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('index');
 
     // Produtos / Serviços CRUD
@@ -94,4 +115,13 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureAdmin::class])->prefix('ad
     Route::put('/categorias/{category}',                      [AdminCategoryController::class, 'update'])->name('categories.update');
     Route::put('/categorias/{category}/toggle',               [AdminCategoryController::class, 'toggleActive'])->name('categories.toggle');
     Route::delete('/categorias/{category}',                   [AdminCategoryController::class, 'destroy'])->name('categories.destroy');
+
+    // Parceiros de entrega
+    Route::get('/parceiros',                                  [DeliveryPartnerController::class, 'index'])->name('delivery-partners.index');
+    Route::get('/parceiros/novo',                             [DeliveryPartnerController::class, 'create'])->name('delivery-partners.create');
+    Route::post('/parceiros',                                 [DeliveryPartnerController::class, 'store'])->name('delivery-partners.store');
+    Route::get('/parceiros/{deliveryPartner}/editar',         [DeliveryPartnerController::class, 'edit'])->name('delivery-partners.edit');
+    Route::put('/parceiros/{deliveryPartner}',                [DeliveryPartnerController::class, 'update'])->name('delivery-partners.update');
+    Route::put('/parceiros/{deliveryPartner}/toggle',         [DeliveryPartnerController::class, 'toggleActive'])->name('delivery-partners.toggle');
+    Route::delete('/parceiros/{deliveryPartner}',             [DeliveryPartnerController::class, 'destroy'])->name('delivery-partners.destroy');
 });

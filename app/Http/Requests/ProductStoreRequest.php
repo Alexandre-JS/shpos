@@ -27,6 +27,7 @@ class ProductStoreRequest extends FormRequest
             'category_id' => 'nullable|exists:categories,id',
             'type' => 'required|in:product,service',
             'is_active' => 'sometimes|boolean',
+            'has_delivery' => 'sometimes|boolean',
             // Discount
             'discount_type' => 'nullable|in:percent,amount|required_with:discount_value',
             'discount_value' => 'nullable|numeric|min:0.01',

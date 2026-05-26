@@ -116,9 +116,13 @@
                     <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                 @enderror
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-5">
                 <label class="inline-flex items-center gap-2 text-sm">
                     <input type="checkbox" name="is_active" value="1" @checked(old('is_active', true)) /> Ativo
+                </label>
+                <label class="inline-flex items-center gap-2 text-sm">
+                    <input type="checkbox" name="has_delivery" value="1" @checked(old('has_delivery', false)) />
+                    <span>Entrega disponível</span>
                 </label>
             </div>
             <div class="flex justify-end gap-3 pt-4">

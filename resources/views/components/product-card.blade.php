@@ -1,111 +1,113 @@
-@props(['product', 'showEntity' => false])
+@props(['product', 'showEntity' => true])
 
-<?php
-use Illuminate\Support\Str;
-?>
+@php
+$primary = method_exists($product, 'primaryImage') ? $product->primaryImage() : null;
+$orig    = $primary?->path ?? $product->image_path;
+$display = null;
+if ($orig) {
+    $clean     = ltrim($orig, '/');
+    $small     = preg_replace('/(\.[a-zA-Z0-9]+)$/', '_sm$1', $clean);
+    $display   = file_exists(public_path($small)) ? $small : $clean;
+}
 
-<div
-    class="group flex flex-col rounded-lg border border-gray-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
-    <a href="{{ route('product.show', $product->slug) }}" class="aspect-[4/3] relative block overflow-hidden bg-gray-100">
-        @php
-            $primary = method_exists($product, 'primaryImage') ? $product->primaryImage() : null;
-            $orig = $primary?->path ?? $product->image_path;
-            $display = null;
-            if ($orig) {
-                $clean = ltrim($orig, '/');
-                $small = preg_replace('/(\.[a-zA-Z0-9]+)$/', '_sm$1', $clean);
-                $fullSmall = public_path($small);
-                $display = file_exists($fullSmall) ? $small : $clean;
-            }
-        @endphp
+$hasDiscount  = method_exists($product, 'isDiscountActive') && $product->isDiscountActive();
+$discountPct  = $hasDiscount ? $product->discountPercent() : 0;
+
+// Tempo restante do desconto (urgência)
+$expireLabel = null;
+if ($hasDiscount && $product->discount_ends_at) {
+    $hours = $product->discount_ends_at->diffInHours(now(), false);
+    if ($hours < 0 && abs($hours) < 48) {
+        $expireLabel = 'Expira em ' . (abs($hours) >= 1 ? abs($hours) . 'h' : $product->discount_ends_at->diffInMinutes(now(), false) * -1 . 'm');
+    }
+}
+@endphp
+
+<a href="{{ route('product.show', $product->slug) }}"
+   class="group flex flex-col bg-white rounded-xl border border-gray-100 hover:border-amber-200 hover:shadow-md transition-all duration-200 overflow-hidden">
+
+    {{-- Imagem do produto --}}
+    <div class="relative aspect-square bg-gray-50 overflow-hidden">
         @if ($display)
             <img src="/{{ $display }}" alt="{{ $product->name }}" loading="lazy"
-                class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                 class="w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-300" />
         @else
-            <div class="flex items-center justify-center h-full w-full text-gray-400 text-sm">Sem imagem</div>
+            <div class="flex flex-col items-center justify-center h-full gap-2 text-gray-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span class="text-[10px]">Sem imagem</span>
+            </div>
         @endif
-        <div class="absolute top-2 left-2 flex gap-1">
-            @if ($product->category)
-                <span class="badge badge-neutral badge-xs">{{ $product->category->name }}</span>
-            @endif
-            @if ($product->is_featured ?? false)
-                <span class="badge badge-primary badge-xs">Destaque</span>
-            @endif
-            @php
-                $showExpire = false;
-                $expireLabel = null;
-                if (
-                    method_exists($product, 'isDiscountActive') &&
-                    $product->isDiscountActive() &&
-                    $product->discount_ends_at
-                ) {
-                    $diffSec = $product->discount_ends_at->diffInSeconds(now(), false);
-                    if ($diffSec > 0) {
-                        // future
-                        $hours = $product->discount_ends_at->diffInHours();
-                        if ($hours < 48) {
-                            $showExpire = true;
-                            $expireLabel =
-                                'Expira em ' .
-                                ($hours >= 1 ? $hours . 'h' : $product->discount_ends_at->diffInMinutes() . 'm');
-                        }
-                    }
-                }
-            @endphp
-            @if ($showExpire)
-                <span class="badge badge-error badge-xs">{{ $expireLabel }}</span>
-            @endif
-        </div>
-    </a>
 
-    <div class="flex flex-col flex-1 p-3">
-        <h3 class="font-medium text-sm leading-tight line-clamp-2 min-h-[2.5rem]">
-            <a href="{{ route('product.show', $product->slug) }}" class="hover:underline">
-                {{ $product->name }}
-            </a>
-        </h3>
-        <p class="mt-2 text-xs text-gray-600 line-clamp-2 min-h-[2.25rem]">
-            {{ Str::limit(strip_tags($product->short_description ?? $product->description), 120) }}
-        </p>
+        {{-- Badge de desconto --}}
+        @if ($hasDiscount && $discountPct > 0)
+            <span class="absolute top-2 left-2 text-[10px] font-bold text-white px-2 py-0.5 rounded-md"
+                  style="background:var(--color-accent)">
+                -{{ round($discountPct) }}%
+            </span>
+        @endif
 
+        {{-- Categoria --}}
+        @if ($product->category)
+            <span class="absolute top-2 right-2 text-[9px] font-medium bg-white/80 backdrop-blur-sm text-gray-600 px-2 py-0.5 rounded-full border border-gray-100">
+                {{ $product->category->name }}
+            </span>
+        @endif
+
+        {{-- Badge urgência --}}
+        @if ($expireLabel)
+            <span class="absolute bottom-2 left-2 text-[9px] font-medium bg-red-500 text-white px-2 py-0.5 rounded">
+                {{ $expireLabel }}
+            </span>
+        @endif
+
+        {{-- Entrega disponível --}}
+        @if ($product->has_delivery ?? false)
+            <span class="absolute bottom-2 right-2 text-[9px] font-medium bg-green-600 text-white px-2 py-0.5 rounded flex items-center gap-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+                Entrega
+            </span>
+        @endif
+    </div>
+
+    {{-- Informação do produto --}}
+    <div class="flex flex-col flex-1 px-3 py-3 gap-1">
+
+        {{-- Loja (se showEntity) --}}
         @if ($showEntity && $product->entity)
-            <div class="mt-2 flex items-center gap-2">
-                <span class="text-[11px] uppercase tracking-wide text-gray-500">{{ $product->entity->name }}</span>
-            </div>
+            <span class="text-[10px] text-gray-400 uppercase tracking-wide truncate">
+                {{ $product->entity->name }}
+            </span>
         @endif
 
-        <div class="mt-3 flex items-end justify-between">
-            <div class="space-y-0.5">
-                @if (!is_null($product->price))
-                    @php
-                        $hasDiscount = method_exists($product, 'isDiscountActive') && $product->isDiscountActive();
-                    @endphp
-                    @if ($hasDiscount)
-                        <div class="flex items-baseline gap-1">
-                            <span
-                                class="text-xs line-through text-gray-400">{{ number_format($product->price, 2, ',', '.') }}
-                                MT</span>
-                            <span
-                                class="font-semibold text-sm text-red-600">{{ number_format($product->discountedPrice(), 2, ',', '.') }}
-                                MT</span>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <span
-                                class="inline-block bg-red-100 text-red-700 text-[10px] font-semibold px-1.5 py-0.5 rounded">-{{ rtrim(rtrim(number_format($product->discountPercent(), 2, ',', '.'), '0'), ',') }}%</span>
-                            <span class="text-[10px] text-gray-500">Poupa
-                                {{ number_format($product->discountAmount(), 2, ',', '.') }} MT</span>
-                        </div>
-                    @else
-                        <div class="font-semibold text-sm">
+        {{-- Nome --}}
+        <h3 class="text-sm font-medium leading-snug line-clamp-2 text-gray-800 group-hover:text-amber-600 transition-colors min-h-[2.5rem]">
+            {{ $product->name }}
+        </h3>
+
+        {{-- Preço --}}
+        <div class="mt-auto pt-2">
+            @if (!is_null($product->price))
+                @if ($hasDiscount)
+                    <div class="flex items-baseline gap-1.5 flex-wrap">
+                        <span class="text-base font-bold" style="color:var(--color-accent)">
+                            {{ number_format($product->discountedPrice(), 2, ',', '.') }} MT
+                        </span>
+                        <span class="text-xs line-through text-gray-400">
                             {{ number_format($product->price, 2, ',', '.') }} MT
-                        </div>
-                    @endif
+                        </span>
+                    </div>
+                @else
+                    <span class="text-base font-bold" style="color:var(--color-accent)">
+                        {{ number_format($product->price, 2, ',', '.') }} MT
+                    </span>
                 @endif
-                @if ($product->views_count ?? false)
-                    <div class="text-[10px] text-gray-500">{{ $product->views_count }} visualizações</div>
-                @endif
-            </div>
-            <a href="{{ route('product.show', $product->slug) }}" class="btn btn-xs btn-primary">Ver</a>
+            @else
+                <span class="text-xs text-gray-400 italic">Preço sob consulta</span>
+            @endif
         </div>
     </div>
-</div>
+</a>

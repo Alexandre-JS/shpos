@@ -72,7 +72,8 @@ class ProductManagementController extends Controller
         DB::transaction(function () use ($data, $entity, $slugger, $uploader, $imagesFiles, $primaryIndex, $request) {
             $data['entity_id'] = $entity->id;
             $data['slug'] = $slugger->generate($data['name'], Product::class, ['entity_id' => $entity->id]);
-            $data['is_active'] = $data['is_active'] ?? true;
+            $data['is_active']    = $data['is_active'] ?? true;
+            $data['has_delivery'] = $data['has_delivery'] ?? false;
 
             // Legacy single image fallback
             if ($request->hasFile('image') && empty($imagesFiles)) {
@@ -161,7 +162,8 @@ class ProductManagementController extends Controller
                 $data['image_path'] = $uploader->upload($request->file('image'), 'uploads/products');
             }
 
-            $data['is_active'] = $data['is_active'] ?? false;
+            $data['is_active']    = $data['is_active'] ?? false;
+            $data['has_delivery'] = $data['has_delivery'] ?? false;
             $product->update($data);
             Log::debug('ProductManagementController.update:updated', [
                 'product_id' => $product->id,

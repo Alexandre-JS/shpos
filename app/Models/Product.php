@@ -26,10 +26,12 @@ class Product extends Model
         'discount_value',
         'discount_starts_at',
         'discount_ends_at',
+        'has_delivery',
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
+        'is_active'    => 'boolean',
+        'has_delivery' => 'boolean',
         'price' => 'decimal:2',
         'discount_value' => 'decimal:2',
         'discount_starts_at' => 'datetime',

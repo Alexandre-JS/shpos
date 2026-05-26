@@ -46,7 +46,10 @@ class HomeController extends Controller
             ->limit(30)
             ->get();
 
-        return view('home.index', compact('recent', 'discounted', 'mostViewed', 'products', 'categories', 'entities'));
+        $totalProducts = Product::active()->count();
+        $totalEntities = \App\Models\Entity::active()->count();
+
+        return view('home.index', compact('recent', 'discounted', 'mostViewed', 'products', 'categories', 'entities', 'totalProducts', 'totalEntities'));
     }
 
     public function products()

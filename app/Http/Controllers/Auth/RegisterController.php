@@ -56,8 +56,10 @@ class RegisterController extends Controller
             Auth::login($user);
             DB::commit();
 
-            return redirect()->route('dashboard.index')
-                ->with('info', 'Conta criada! O teu registo está a aguardar aprovação. Receberás uma notificação quando estiver activo.');
+            $user->sendEmailVerificationNotification();
+
+            return redirect()->route('verification.notice')
+                ->with('info', 'Conta criada! Verifique o seu email para activar a conta.');
         } catch (\Throwable) {
             DB::rollBack();
             return back()->withErrors(['general' => 'Erro ao registrar.'])->withInput();

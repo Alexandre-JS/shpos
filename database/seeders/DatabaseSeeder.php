@@ -16,10 +16,11 @@ class DatabaseSeeder extends Seeder
     {
         // Admin da plataforma (desenvolvimento)
         User::factory()->create([
-            'name'     => 'Admin',
-            'email'    => 'admin@plataforma.com',
-            'password' => bcrypt('123456'),
-            'is_admin' => true,
+            'name'              => 'Admin',
+            'email'             => 'admin@plataforma.com',
+            'password'          => bcrypt('123456'),
+            'is_admin'          => true,
+            'email_verified_at' => now(),
         ]);
 
         // Categorias iniciais

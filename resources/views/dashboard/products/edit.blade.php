@@ -174,9 +174,13 @@
                     </div>
                 </details>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-5">
                 <label class="inline-flex items-center gap-2 text-sm">
                     <input type="checkbox" name="is_active" value="1" @checked(old('is_active', $product->is_active)) /> Ativo
+                </label>
+                <label class="inline-flex items-center gap-2 text-sm">
+                    <input type="checkbox" name="has_delivery" value="1" @checked(old('has_delivery', $product->has_delivery)) />
+                    <span>Entrega disponível</span>
                 </label>
             </div>
             <div class="flex justify-between pt-4">
