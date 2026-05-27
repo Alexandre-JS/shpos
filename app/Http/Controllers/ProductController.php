@@ -24,29 +24,22 @@ class ProductController extends Controller
 
         $product->load(['entity', 'category', 'images']);
 
-        $related = Product::with(['entity:id,name,slug', 'category:id,name,slug'])
-            ->active()
+        $moreFromEntity = Product::active()
+            ->where('entity_id', $product->entity_id)
             ->where('id', '!=', $product->id)
-            ->when($product->category_id, fn($q) => $q->where('category_id', $product->category_id))
-            ->when(!$product->category_id, fn($q) => $q->where('type', $product->type))
-            ->orderByDesc('views_count')
-            ->limit(8)
+            ->limit(4)
             ->get();
 
-        // Se não encontrou nada pela categoria (pode ser muito restrito), faz um fallback por tipo.
-        if ($related->isEmpty()) {
-            $related = Product::with(['entity:id,name,slug', 'category:id,name,slug'])
-                ->active()
-                ->where('id', '!=', $product->id)
-                ->where('type', $product->type)
-                ->orderByDesc('views_count')
-                ->limit(8)
-                ->get();
-        }
+        $similarProducts = Product::active()
+            ->where('category_id', $product->category_id)
+            ->where('id', '!=', $product->id)
+            ->limit(4)
+            ->get();
 
         return view('products.show', [
             'product' => $product,
-            'related' => $related,
+            'moreFromEntity' => $moreFromEntity,
+            'similarProducts' => $similarProducts,
         ]);
     }
 }

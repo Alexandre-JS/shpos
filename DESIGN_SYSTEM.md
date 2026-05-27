@@ -1,25 +1,65 @@
-# M'Shop Luxury Marketplace - Design System Guide
+# Shops Marketplace - Design System Guide
 
 ## Table of Contents
 
 1. [Color Palette](#color-palette)
-2. [Spacing Scale](#spacing-scale)
-3. [Typography](#typography)
-4. [Components](#components)
-5. [Responsive Design](#responsive-design)
-6. [Examples](#examples)
+2. [Slogan](#slogan)
 
 ---
 
 ## Color Palette
 
-### Primary Colors
+### Primary Colors (Orange + White)
 
-| Name      | Value     | CSS Variable       | Usage                              |
-| --------- | --------- | ------------------ | ---------------------------------- |
-| Navy Blue | `#1A2B49` | `var(--navy-blue)` | Primary text, backgrounds, borders |
-| Gold      | `#C8A559` | `var(--gold)`      | Accents, CTA buttons, highlights   |
-| White     | `#FFFFFF` | `var(--white)`     | Content backgrounds, text contrast |
+| Name           | Value     | CSS Variable          | Usage                              |
+| -------------- | --------- | --------------------- | ---------------------------------- |
+| Brand Orange   | `#EA580C` | `var(--color-primary)`| Primary brand color, headers, CTAs |
+| Accent Orange  | `#F97316` | `var(--color-accent)` | Highlighting, secondary actions    |
+| White          | `#FFFFFF` | `var(--color-white)`  | Backgrounds, contrast              |
+
+---
+
+## Slogan
+
+**DESCUBRA · CONECTE · COMPRE**
+
+Esta frase define o ecossistema da plataforma:
+1. **Descubra**: O utilizador navega e encontra produtos/serviços.
+2. **Conecte**: O utilizador entra em contacto direto com o vendedor.
+3. **Compre**: A finalização do negócio fora da plataforma.
+
+---
+
+## Spacing Scale
+
+All spacing follows a consistent scale based on 0.5rem increments:
+
+```css
+--space-xs:    0.5rem   /* 8px  - Small gaps, padding */
+--space-sm:    0.75rem  /* 12px - Compact spacing */
+--space-md:    1rem     /* 16px - Standard spacing */
+--space-lg:    1.5rem   /* 24px - Section separation */
+--space-xl:    2rem     /* 32px - Large gaps */
+--space-2xl:   3rem     /* 48px - Very large gaps */
+--space-3xl:   6rem     /* 96px - Massive gaps */
+```
+
+---
+
+## Typography
+
+### Font Families
+
+-   **Sans-serif**: `var(--font-sans)` → Inter / Instrument Sans (body text, UI elements)
+
+### Font Sizes (Reference)
+
+-   H1: `2rem` (32px)
+-   H2: `1.5rem` (24px)
+-   H3: `1.125rem` (18px)
+-   Body: `0.875rem` (14px)
+-   Small: `0.75rem` (12px)
+-   Tiny: `0.625rem` (10px)
 
 ### Extended Colors
 

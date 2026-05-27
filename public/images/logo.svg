@@ -1,0 +1,71 @@
+<svg width="500" height="340" viewBox="0 0 680 455" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>Shops — Vitrine Digital</title>
+<desc>Logo da plataforma Shops: sacola laranja com coração e slogan Descubra, Conecte, Compre</desc>
+
+<defs>
+  <clipPath id="bagClip">
+    <path d="M218 90 L462 90 L479 292 Q480 308 462 308 L218 308 Q200 308 201 292 Z"/>
+  </clipPath>
+</defs>
+
+<!-- Background white -->
+<rect width="680" height="455" fill="white"/>
+
+<!-- Shadow -->
+<path d="M222 96 L458 96 L474 294 Q475 308 458 308 L222 308 Q206 308 206 294 Z"
+      fill="#FED7AA" opacity="0.4" transform="translate(6,8)"/>
+
+<!-- HANDLE -->
+<path d="M285 95 Q 285 30 340 30 Q 395 30 395 95"
+      fill="none" stroke="#C2410C" stroke-width="24" stroke-linecap="round"/>
+<path d="M299 95 Q 299 52 340 52 Q 381 52 381 95"
+      fill="none" stroke="#FB923C" stroke-width="9" stroke-linecap="round"/>
+
+<!-- BAG BODY base -->
+<path d="M218 90 L462 90 L479 292 Q480 308 462 308 L218 308 Q200 308 201 292 Z" fill="#FB923C"/>
+
+<!-- GEOMETRIC SECTIONS -->
+<g clip-path="url(#bagClip)">
+  <path d="M218 90 L462 90 L445 255 Q 390 225 330 248 Q 268 270 201 292 L201 260 Z" fill="#F97316"/>
+  <path d="M355 90 L462 90 L479 308 L355 308 Q 400 268 428 210 Z" fill="#EA580C"/>
+  <path d="M218 90 L315 90 L292 148 Q 258 132 225 155 Z" fill="#FDBA74"/>
+  <rect x="180" y="282" width="340" height="40" fill="#EA580C" opacity="0.5"/>
+</g>
+
+<!-- Bag outline -->
+<path d="M218 90 L462 90 L479 292 Q480 308 462 308 L218 308 Q200 308 201 292 Z"
+      fill="none" stroke="#C2410C" stroke-width="3"/>
+
+<!-- HEART -->
+<path d="M340 228
+         C 340 228 308 210 308 186
+         C 308 170 320 162 332 170
+         C 335 172 338 177 340 181
+         C 342 177 345 172 348 170
+         C 360 162 372 170 372 186
+         C 372 210 340 228 340 228 Z"
+      fill="white"/>
+
+<!-- SPARKLE -->
+<path d="M367 158 L369.5 168 L380 170 L369.5 172 L367 182 L364.5 172 L354 170 L364.5 168 Z"
+      fill="white"/>
+<circle cx="356" cy="158" r="3" fill="white" opacity="0.7"/>
+
+<!-- SHOPS TEXT -->
+<text x="340" y="382"
+      text-anchor="middle"
+      font-family="'Arial Black', 'Arial Bold', Arial, sans-serif"
+      font-size="80"
+      font-weight="900"
+      fill="#EA580C">Shops</text>
+
+<!-- SLOGAN -->
+<text x="340" y="422"
+      text-anchor="middle"
+      font-family="Arial, sans-serif"
+      font-size="15"
+      font-weight="700"
+      letter-spacing="3.5"
+      fill="#9A3412">DESCUBRA · CONECTE · COMPRE</text>
+
+</svg>

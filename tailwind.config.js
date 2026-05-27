@@ -15,6 +15,14 @@ export default {
   ],
   theme: {
     extend: {
+      colors: {
+        'brand-orange': {
+          300: '#FDBA74', // Suave (Plano esquerdo do logo / Detalhes)
+          400: '#FB923C', // Claro (Hover states)
+          500: '#F97316', // Principal (Botões primários, Destaques)
+          600: '#EA580C'  // Escuro (Textos fortes, Plano direito do logo, CTAs Principais)
+        }
+      },
       fontFamily: {
         sans: [
           'Instrument Sans',

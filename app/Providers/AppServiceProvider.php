@@ -18,5 +18,14 @@ class AppServiceProvider extends ServiceProvider
     {
         Schema::defaultStringLength(191);
         Product::observe(ProductObserver::class);
+
+        view()->composer('layouts.app', function ($view) {
+            $view->with('globalCategories', \App\Models\Category::active()
+                ->withCount(['products as items_count' => function ($q) {
+                    $q->active();
+                }])
+                ->orderByDesc('items_count')
+                ->get());
+        });
     }
 }
