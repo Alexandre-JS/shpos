@@ -31,6 +31,7 @@ class EntityFactory extends Factory
             'is_active' => true,
             'is_featured' => false,
             'plan_type' => 'free',
+            'status' => Entity::STATUS_APPROVED,
         ];
     }
 }

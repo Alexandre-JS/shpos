@@ -2,25 +2,25 @@
 @section('title', $title ?? 'Produtos e Serviços')
 @section('meta_description', 'Explore ' . strtolower($title ?? 'produtos e serviços') . ' de empresas moçambicanas em ' . config('app.name', 'Vitrine') . '.')
 @section('content')
-    <x-app-container>
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <div class="lg:col-span-1 order-2 lg:order-1">
+    <x-app-container class="py-4">
+        <div class="row g-4">
+            <div class="col-lg-3 order-2 order-lg-1">
                 <x-sidebar-lists :categories="$categories" :entities="$entities" />
             </div>
-            <div class="lg:col-span-3 order-1 lg:order-2">
-                <h1 class="text-2xl font-bold mb-6">{{ $title }}</h1>
-                <form method="GET" class="mb-4 flex items-center gap-4 text-sm">
+            <div class="col-lg-9 order-1 order-lg-2">
+                <h1 class="fs-3 fw-bold mb-4">{{ $title }}</h1>
+                <form method="GET" class="mb-4 d-flex align-items-center gap-3 small">
                     @foreach (request()->except('promo', 'page') as $k => $v)
                         <input type="hidden" name="{{ $k }}" value="{{ $v }}">
                     @endforeach
-                    <label class="inline-flex items-center gap-2">
-                        <input type="checkbox" name="promo" value="1" @checked(request('promo'))
+                    <div class="form-check m-0">
+                        <input class="form-check-input" type="checkbox" id="promoCheck" name="promo" value="1" @checked(request('promo'))
                             onchange="this.form.submit()">
-                        <span>Em promoção</span>
-                    </label>
+                        <label class="form-check-label" for="promoCheck">Em promoção</label>
+                    </div>
                     @if (request('promo'))
                         <a href="{{ request()->fullUrlWithQuery(['promo' => null, 'page' => null]) }}"
-                            class="text-xs text-gray-500 hover:text-gray-700">Limpar</a>
+                            class="small link-secondary text-decoration-none">Limpar</a>
                     @endif
                 </form>
                 @include('partials.product-grid-paginated', ['paginator' => $products])

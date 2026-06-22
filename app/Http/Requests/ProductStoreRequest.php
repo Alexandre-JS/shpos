@@ -24,7 +24,7 @@ class ProductStoreRequest extends FormRequest
             'name' => 'required|string|min:3|max:150',
             'description' => 'required|string|min:1|max:2000',
             'price' => 'nullable|numeric|min:0|max:99999999.99',
-            'category_id' => 'nullable|exists:categories,id',
+            'category_id' => 'required|exists:categories,id',
             'type' => 'required|in:product,service',
             'is_active' => 'sometimes|boolean',
             'has_delivery' => 'sometimes|boolean',

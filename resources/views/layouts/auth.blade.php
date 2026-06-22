@@ -4,15 +4,22 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@yield('title', config('app.name', 'M\'Shop')) - Autenticação</title>
+    <title>@yield('title', config('app.name', 'Shops')) — Autenticação</title>
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/scss/app.scss', 'resources/js/app.js'])
     @stack('styles')
 </head>
 
-<body
-    style="background: linear-gradient(135deg, var(--navy-blue) 0%, var(--navy-dark) 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem;">
-    <div style="width: 100%; max-width: 400px;">
+<body class="min-vh-100 d-flex align-items-center justify-content-center px-3 py-5" style="background: linear-gradient(135deg, #EA580C 0%, #F97316 60%, #FB923C 100%);">
+
+    <div class="w-100 vstack gap-4" style="max-width:@yield('auth_width', '28rem');">
+        {{-- Logo --}}
+        <div class="text-center">
+            <a href="{{ route('home') }}" class="d-inline-block">
+                <img src="{{ asset('images/logo.svg') }}" alt="{{ config('app.name') }}" class="mx-auto" style="height:4rem;width:auto;filter:drop-shadow(0 4px 6px rgba(0,0,0,.15));">
+            </a>
+        </div>
+
         @yield('content')
     </div>
 

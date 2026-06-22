@@ -26,15 +26,19 @@ Route::get('/produtos', [HomeController::class, 'products'])->name('products');
 Route::get('/servicos', [HomeController::class, 'services'])->name('services');
 Route::get('/buscar', [HomeController::class, 'search'])->name('search');
 
-// Detalhe de produto/serviço (binding via slug)
-Route::get('/produto/{product:slug}', [ProductController::class, 'show'])->name('product.show');
+// Detalhe de produto/serviço com binding limitado à loja.
+Route::get('/loja/{entity:slug}/produto/{product:slug}', [ProductController::class, 'show'])
+    ->scopeBindings()
+    ->name('product.show');
+Route::get('/produto/{product}', [ProductController::class, 'legacy'])->name('product.legacy');
 
 // Perfil público da entidade (mini-site)
 Route::get('/loja/{entity:slug}', [EntityController::class, 'show'])->name('entity.show');
 // Listagem de entidades
 Route::get('/entidades', [EntityController::class, 'index'])->name('entities.index');
 
-// Página pública de categoria
+// Página pública de categorias
+Route::get('/categorias', [\App\Http\Controllers\CategoryController::class, 'index'])->name('categories.index');
 Route::get('/categoria/{category:slug}', [\App\Http\Controllers\CategoryController::class, 'show'])->name('category.show');
 
 // Páginas estáticas / institucionais

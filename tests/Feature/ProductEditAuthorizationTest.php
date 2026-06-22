@@ -6,13 +6,14 @@ use App\Models\User;
 use App\Models\Product;
 use App\Models\Entity;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ProductEditAuthorizationTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function owner_can_access_edit_page()
     {
         $user = User::factory()->create();
@@ -26,7 +27,7 @@ class ProductEditAuthorizationTest extends TestCase
             ->assertSee($product->name);
     }
 
-    /** @test */
+    #[Test]
     public function other_user_gets_403_on_edit_page()
     {
         $owner = User::factory()->create();

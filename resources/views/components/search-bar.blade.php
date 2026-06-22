@@ -6,49 +6,50 @@
 'categories' => \App\Models\Category::query()->active()->orderBy('name')->select('id', 'name', 'slug')->get(),
 ])
 @php($live = $attributes->get('live'))
-<div x-data="searchBarComponent({ live: @json((bool) $live), initial: @json($value), url: @json($action), initialCategory: @json(request('cat')) })" class="relative group">
-    <form x-ref="form" :action="url" method="GET" @submit.prevent="submit()" class="flex gap-2">
-        <div class="relative">
-            <select x-model="category" name="cat" @change="changed" class="select w-36 rounded-xl border-gray-200">
-                <option value="">Todas</option>
-                @foreach ($categories as $c)
-                <option value="{{ $c->slug }}">{{ $c->name }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="relative flex-1">
+<div x-data="searchBarComponent({ live: @json((bool) $live), initial: @json($value), url: @json($action), initialCategory: @json(request('cat')) })" class="position-relative">
+    <form x-ref="form" :action="url" method="GET" @submit.prevent="submit()" class="d-flex gap-2">
+        <select x-model="category" name="cat" @change="changed" class="form-select form-select-sm rounded-3 shadow-sm" style="width:9rem;">
+            <option value="">Todas</option>
+            @foreach ($categories as $c)
+            <option value="{{ $c->slug }}">{{ $c->name }}</option>
+            @endforeach
+        </select>
+        <div class="position-relative flex-grow-1">
             <input x-model="q" type="text" name="{{ $name }}" placeholder="{{ $placeholder }}"
                 @input.debounce.300ms="changed"
-                class="w-full border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 focus:ring-2 focus:ring-primary/30 outline-none" />
-            <span
-                class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary">🔍</span>
+                class="form-control rounded-3 shadow-sm ps-5" />
+            <span class="position-absolute top-50 start-0 translate-middle-y ps-3 text-muted">
+                <i class="bi bi-search"></i>
+            </span>
         </div>
     </form>
     <template x-if="live && open && q.trim() !== ''">
-        <div class="absolute z-20 mt-2 w-full bg-white border rounded shadow max-h-96 overflow-auto">
-            <div class="p-2 text-xs text-gray-500 flex justify-between items-center">
+        <div class="position-absolute mt-2 w-100 overflow-auto bg-white border rounded-4 shadow-lg" style="z-index:20;max-height:24rem;">
+            <div class="px-3 py-2 small text-muted d-flex justify-content-between align-items-center border-bottom">
                 <span x-text="countText()"></span>
-                <button class="link link-primary" type="button" @click="goFull()">Ver todos</button>
+                <button class="btn btn-link btn-sm p-0 d-inline-flex align-items-center gap-1 fw-medium text-decoration-none" type="button" @click="goFull()">
+                    Ver todos <i class="bi bi-arrow-right"></i>
+                </button>
             </div>
             <template x-if="loading">
-                <div class="p-4 text-center text-sm">Carregando...</div>
+                <div class="p-4 text-center small text-muted">A pesquisar...</div>
             </template>
-            <ul>
+            <ul class="list-unstyled mb-0">
                 <template x-for="item in results" :key="item.id">
                     <li>
-                        <a :href="item.url" class="flex gap-3 p-2 hover:bg-gray-100">
-                            <img :src="item.image || placeholder" class="w-12 h-12 object-cover rounded bg-gray-100" />
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm font-medium truncate" x-text="item.name"></p>
-                                <p class="text-xs text-gray-500 truncate" x-text="item.entity.name"></p>
+                        <a :href="item.url" class="d-flex gap-3 p-3 text-decoration-none text-body">
+                            <img :src="item.image || placeholder" class="rounded-3 flex-shrink-0 object-fit-cover bg-light" style="width:3rem;height:3rem;" />
+                            <div class="flex-grow-1 min-w-0">
+                                <p class="small fw-medium text-truncate mb-0" x-text="item.name"></p>
+                                <p class="text-muted text-truncate text-uppercase mb-0" style="font-size:.75rem;letter-spacing:.05em;" x-text="item.entity.name"></p>
                             </div>
-                            <div class="text-xs font-semibold" x-text="formatPrice(item.price)"></div>
+                            <div class="small fw-bold text-primary flex-shrink-0" x-text="formatPrice(item.price)"></div>
                         </a>
                     </li>
                 </template>
             </ul>
             <template x-if="!loading && results.length===0">
-                <div class="p-3 text-sm text-gray-500">Sem resultados</div>
+                <div class="p-4 small text-muted text-center">Sem resultados</div>
             </template>
         </div>
     </template>
@@ -60,11 +61,13 @@
     function searchBarComponent({
         live,
         initial,
-        url
+        url,
+        initialCategory
     }) {
         return {
             live,
             url,
+            initialCategory,
             q: initial || '',
             results: [],
             open: false,

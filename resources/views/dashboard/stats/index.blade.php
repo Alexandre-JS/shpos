@@ -1,97 +1,105 @@
 @extends('layouts.dashboard')
-@section('nav.stats', 'bg-gray-100 font-medium')
+@section('nav.stats', 'active')
 @section('header', 'Estatísticas')
 @section('content')
-    <div class="space-y-10" x-data='{"series": @json($viewsSeries)}'>
-        <div class="grid md:grid-cols-4 gap-6">
-            <div class="p-5 bg-white rounded border space-y-2">
-                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Produtos</h3>
-                <p class="text-3xl font-bold">{{ $totalProducts }}</p>
-                <p class="text-xs text-gray-400">Itens do tipo produto</p>
+    <div class="vstack gap-4">
+        <div class="row g-4">
+            <div class="col-6 col-md-3">
+                <div class="card h-100"><div class="card-body vstack gap-1">
+                    <h3 class="small fw-semibold text-muted text-uppercase mb-0" style="letter-spacing:.05em;">Produtos</h3>
+                    <p class="fs-2 fw-bold mb-0">{{ $totalProducts }}</p>
+                    <p class="small text-muted mb-0">Itens do tipo produto</p>
+                </div></div>
             </div>
-            <div class="p-5 bg-white rounded border space-y-2">
-                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Serviços</h3>
-                <p class="text-3xl font-bold">{{ $totalServices }}</p>
-                <p class="text-xs text-gray-400">Itens do tipo serviço</p>
+            <div class="col-6 col-md-3">
+                <div class="card h-100"><div class="card-body vstack gap-1">
+                    <h3 class="small fw-semibold text-muted text-uppercase mb-0" style="letter-spacing:.05em;">Serviços</h3>
+                    <p class="fs-2 fw-bold mb-0">{{ $totalServices }}</p>
+                    <p class="small text-muted mb-0">Itens do tipo serviço</p>
+                </div></div>
             </div>
-            <div class="p-5 bg-white rounded border space-y-2">
-                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Ativos</h3>
-                <p class="text-3xl font-bold">{{ $totalActive }}</p>
-                <p class="text-xs text-gray-400">Publicados</p>
+            <div class="col-6 col-md-3">
+                <div class="card h-100"><div class="card-body vstack gap-1">
+                    <h3 class="small fw-semibold text-muted text-uppercase mb-0" style="letter-spacing:.05em;">Ativos</h3>
+                    <p class="fs-2 fw-bold mb-0">{{ $totalActive }}</p>
+                    <p class="small text-muted mb-0">Publicados</p>
+                </div></div>
             </div>
-            <div class="p-5 bg-white rounded border space-y-2">
-                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Novos (7d)</h3>
-                <p class="text-3xl font-bold">{{ $recentLast7 }}</p>
-                <p class="text-xs text-gray-400">Adicionados últimos 7 dias</p>
-            </div>
-        </div>
-
-        <div class="grid md:grid-cols-3 gap-6">
-            <div class="md:col-span-2 p-5 bg-white rounded border space-y-4">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-sm font-semibold">Views últimos 7 dias</h3>
-                    <span class="text-xs text-gray-500">24h: {{ $views24h }} • 7d: {{ $views7d }}</span>
-                </div>
-                <div class="h-40 flex items-end gap-2" x-init>
-                    <template x-for="pt in series" :key="pt.date">
-                        <div class="flex-1 flex flex-col items-center gap-1">
-                            <div class="w-full bg-gradient-to-t from-primary/20 to-primary rounded"
-                                :style="'height:' + (pt.count === 0 ? 4 : (pt.count * 12 + 8)) + 'px'" title=""
-                                x-tooltip="pt.count + ' views'">
-                            </div>
-                            <span class="text-[10px] text-gray-500" x-text="pt.date.slice(5)"></span>
-                        </div>
-                    </template>
-                </div>
-            </div>
-            <div class="p-5 bg-white rounded border space-y-4">
-                <h3 class="text-sm font-semibold">Top 5 mais vistos</h3>
-                <ul class="divide-y text-sm">
-                    @forelse($topViewed as $p)
-                        <li class="py-2 flex items-center justify-between gap-3">
-                            <div class="min-w-0">
-                                <a href="{{ route('product.show', $p->slug) }}"
-                                    class="font-medium hover:underline truncate-2">{{ $p->name }}</a>
-                                <div class="text-[10px] text-gray-500 uppercase">
-                                    {{ $p->type === 'product' ? 'Produto' : 'Serviço' }}</div>
-                            </div>
-                            <span class="text-xs font-semibold text-gray-600">{{ $p->views_count }}</span>
-                        </li>
-                    @empty
-                        <li class="py-4 text-xs text-gray-500">Sem dados.</li>
-                    @endforelse
-                </ul>
+            <div class="col-6 col-md-3">
+                <div class="card h-100"><div class="card-body vstack gap-1">
+                    <h3 class="small fw-semibold text-muted text-uppercase mb-0" style="letter-spacing:.05em;">Novos (7d)</h3>
+                    <p class="fs-2 fw-bold mb-0">{{ $recentLast7 }}</p>
+                    <p class="small text-muted mb-0">Adicionados últimos 7 dias</p>
+                </div></div>
             </div>
         </div>
 
-        <div class="p-5 bg-white rounded border space-y-4">
-            <h3 class="text-sm font-semibold">Distribuição por Categoria</h3>
-            <div class="overflow-x-auto">
-                <table class="min-w-full text-xs">
-                    <thead class="bg-gray-50 text-gray-500 uppercase">
+        <div class="row g-4">
+            <div class="col-md-8">
+                <div class="card h-100"><div class="card-body vstack gap-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h3 class="small fw-semibold mb-0">Views últimos 7 dias</h3>
+                        <span class="small text-muted">24h: {{ $views24h }} • 7d: {{ $views7d }}</span>
+                    </div>
+                    @php $maxViews = max(1, $viewsSeries->max('count')); @endphp
+                    <div class="d-flex align-items-end gap-2" style="height:10rem;">
+                        @foreach ($viewsSeries as $pt)
+                            <div class="flex-fill d-flex flex-column align-items-center gap-1" title="{{ $pt['count'] }} views">
+                                <span class="text-muted" style="font-size:.625rem;">{{ $pt['count'] }}</span>
+                                <div class="w-100 bg-primary rounded-top" style="height: {{ max(4, round(($pt['count'] / $maxViews) * 120)) }}px"></div>
+                                <span class="text-muted" style="font-size:.625rem;">{{ substr($pt['date'], 5) }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                </div></div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100"><div class="card-body vstack gap-3">
+                    <h3 class="small fw-semibold mb-0">Top 5 mais vistos</h3>
+                    <ul class="list-group list-group-flush small">
+                        @forelse($topViewed as $p)
+                            <li class="list-group-item px-0 d-flex align-items-center justify-content-between gap-3">
+                                <div class="min-w-0">
+                                    <a href="{{ route('product.show', $p->publicRouteParameters()) }}" class="fw-medium link-body-emphasis text-decoration-none truncate-2">{{ $p->name }}</a>
+                                    <div class="text-muted text-uppercase" style="font-size:.625rem;">{{ $p->type === 'product' ? 'Produto' : 'Serviço' }}</div>
+                                </div>
+                                <span class="small fw-semibold text-muted">{{ $p->views_count }}</span>
+                            </li>
+                        @empty
+                            <li class="list-group-item px-0 small text-muted">Sem dados.</li>
+                        @endforelse
+                    </ul>
+                </div></div>
+            </div>
+        </div>
+
+        <div class="card"><div class="card-body vstack gap-3">
+            <h3 class="small fw-semibold mb-0">Distribuição por Categoria</h3>
+            <div class="table-responsive">
+                <table class="table table-sm small mb-0">
+                    <thead class="table-light text-uppercase text-muted">
                         <tr>
-                            <th class="text-left px-3 py-2">Categoria</th>
-                            <th class="text-left px-3 py-2">Total</th>
-                            <th class="text-left px-3 py-2">%</th>
+                            <th>Categoria</th>
+                            <th>Total</th>
+                            <th>%</th>
                         </tr>
                     </thead>
                     <tbody>
                         @php $grand = max(1, $byCategory->sum('total')); @endphp
                         @forelse($byCategory as $row)
-                            <tr class="border-t">
-                                <td class="px-3 py-2 text-gray-700 text-xs">{{ $row->category?->name ?? '—' }}</td>
-                                <td class="px-3 py-2 text-gray-700 text-xs">{{ $row->total }}</td>
-                                <td class="px-3 py-2 text-gray-700 text-xs">
-                                    {{ number_format(($row->total / $grand) * 100, 1) }}%</td>
+                            <tr>
+                                <td>{{ $row->category?->name ?? '—' }}</td>
+                                <td>{{ $row->total }}</td>
+                                <td>{{ number_format(($row->total / $grand) * 100, 1) }}%</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="3" class="px-3 py-6 text-center text-xs text-gray-500">Sem dados.</td>
+                                <td colspan="3" class="text-center py-4 text-muted">Sem dados.</td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
-        </div>
+        </div></div>
     </div>
 @endsection

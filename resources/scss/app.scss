@@ -1,0 +1,216 @@
+// ==========================================================================
+//  Bootstrap 5 + tema personalizado (paleta laranja)
+//  Substitui o setup anterior em Tailwind v4 + DaisyUI.
+// ==========================================================================
+
+// 1) Funções do Bootstrap (necessárias antes de redefinir variáveis)
+@import "bootstrap/scss/functions";
+
+// 2) Overrides de variáveis — paleta laranja da marca
+$primary:        #F97316;
+$primary-dark:   #EA580C;
+$secondary:      #FB923C;
+$success:        #059669;
+$danger:         #dc2626;
+$warning:        #d97706;
+$info:           #EA580C;
+$light:          #f3f4f6;
+$dark:           #7C2D12;
+
+$body-bg:        #fffdfa;
+$body-color:     #1f2937;
+
+$font-family-sans-serif: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+$font-size-base: 0.9375rem;
+
+$border-radius:    0.375rem;
+$border-radius-sm: 0.25rem;
+$border-radius-lg: 0.5rem;
+$border-radius-xl: 0.75rem;
+
+$card-border-color: #e5e7eb;
+$card-cap-bg:       #fff;
+
+$link-decoration: none;
+
+// 3) Resto da pipeline de variáveis e do Bootstrap
+@import "bootstrap/scss/variables";
+@import "bootstrap/scss/variables-dark";
+
+// Mapa de cores do tema (para classes utilitárias e componentes)
+$theme-colors: map-merge(
+  $theme-colors,
+  (
+    "primary": $primary,
+    "secondary": $secondary,
+    "accent": $secondary,
+    "dark": $dark,
+  )
+);
+
+@import "bootstrap/scss/maps";
+@import "bootstrap/scss/mixins";
+@import "bootstrap/scss/root";
+@import "bootstrap/scss/bootstrap";
+
+// 4) Ícones
+@import "bootstrap-icons/font/bootstrap-icons.css";
+
+// ==========================================================================
+//  Helpers personalizados (migrados do CSS antigo)
+// ==========================================================================
+
+:root {
+  --color-primary: #{$primary};
+  --color-primary-dark: #{$primary-dark};
+  --color-accent: #{$secondary};
+  --color-canvas: #fffdfa;
+}
+
+html,
+body {
+  scroll-behavior: smooth;
+}
+
+body {
+  background:
+    radial-gradient(circle at top, rgba(251, 146, 60, 0.08), transparent 22rem),
+    var(--color-canvas);
+}
+
+::selection {
+  background: rgba(249, 115, 22, 0.18);
+  color: #7c2d12;
+}
+
+// Alpine.js cloak
+[x-cloak] {
+  display: none !important;
+}
+
+// Botões laranja sólidos: texto branco.
+// O Bootstrap escolhe automaticamente texto escuro porque o laranja é claro;
+// forçamos branco (mais legível e alinhado à marca). Os .btn-outline-* mantêm
+// o texto colorido normal.
+.btn-primary,
+.btn-secondary {
+  --bs-btn-color: #fff;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-active-color: #fff;
+  --bs-btn-disabled-color: #fff;
+}
+
+// Mesma lógica para badges laranja
+.text-bg-primary,
+.text-bg-secondary {
+  color: #fff !important;
+}
+
+// Scrollbar leve (desktop)
+.thin-scrollbar::-webkit-scrollbar { width: 6px; }
+.thin-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.thin-scrollbar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+
+// Fade-in
+.fade-in { animation: fadeIn .35s ease-in forwards; opacity: 0; }
+@keyframes fadeIn { to { opacity: 1; } }
+
+// Truncar várias linhas
+.truncate-2,
+.truncate-3 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.truncate-2 { -webkit-line-clamp: 2; line-clamp: 2; }
+.truncate-3 { -webkit-line-clamp: 3; line-clamp: 3; }
+
+// Container central (≈ max-w-7xl do layout antigo)
+.app-container {
+  width: 100%;
+  max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  @media (min-width: 768px) { padding-left: 1.5rem; padding-right: 1.5rem; }
+}
+
+// Cabeçalho fixo com leve transparência
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(254, 215, 170, 0.7);
+}
+
+// Link de navegação com hover laranja
+.nav-link-soft {
+  color: #6b7280;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  transition: color .15s, background-color .15s;
+  &:hover, &.active { color: var(--color-primary-dark); background: #fff7ed; }
+}
+
+// Cards usados como link (hover laranja)
+.product-card,
+.entity-card {
+  transition: border-color .2s, box-shadow .2s;
+  color: inherit;
+  &:hover {
+    border-color: #fed7aa;
+    box-shadow: 0 4px 16px rgba(234, 88, 12, .12);
+  }
+}
+
+// Borda tracejada (substitui border-dashed do Tailwind)
+.border-dashed { border-style: dashed !important; }
+
+// Item de lista com hover laranja
+.list-soft-link {
+  transition: background-color .15s, color .15s;
+  &:hover { background: #fff7ed; color: var(--color-primary-dark) !important; }
+}
+
+// Link da sidebar (dashboard / admin — tema claro, ativo laranja)
+.dash-link {
+  display: flex;
+  align-items: center;
+  gap: .625rem;
+  padding: .5rem .75rem;
+  border-radius: .375rem;
+  color: #6b7280;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color .15s, color .15s;
+  i { font-size: 1rem; flex-shrink: 0; }
+  &:hover { background: #fff7ed; color: var(--color-primary-dark); }
+  &.active { background: #fff7ed; color: var(--color-primary-dark); font-weight: 600; }
+}
+
+// Sidebar do dashboard / admin.
+// Usa o padrão offcanvas-md (drawer no mobile, fixa no desktop), mas o Bootstrap
+// força background transparente / flex-grow:1 / border:0 nas larguras >= md.
+// Repomos aqui o fundo, a largura fixa e o comportamento de coluna.
+.app-sidebar {
+  background: #fff;
+  width: 16rem;
+}
+
+@media (min-width: 768px) {
+  .offcanvas-md.app-sidebar {
+    position: sticky !important;
+    top: 0;
+    align-self: flex-start;
+    visibility: visible !important;
+    transform: none !important;
+    height: 100vh !important;
+    flex: 0 0 16rem !important;
+    width: 16rem !important;
+    background: #fff !important;
+    border-right: 1px solid var(--bs-border-color) !important;
+  }
+}

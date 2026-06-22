@@ -1,214 +1,110 @@
 @extends('layouts.app')
-@section('title', config('app.name'))
-@section('meta_description', 'Descubra produtos e serviços de empresas moçambicanas. Encontre o que procura e contacte directamente o vendedor.')
+@section('title', 'Produtos e lojas em Moçambique')
+@section('meta_description', 'Encontre produtos, serviços e lojas moçambicanas num só lugar.')
+
 @section('content')
+<section class="app-container pb-5 pt-4 pt-sm-5">
+    <div class="position-relative overflow-hidden rounded-4 bg-dark shadow-lg" style="min-height:390px;">
+        <img
+            src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1400&q=85"
+            alt="Interior de uma loja moderna"
+            class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover" style="opacity:.45;">
+        <div class="position-absolute top-0 start-0 w-100 h-100" style="background:linear-gradient(90deg,rgba(17,24,39,.94) 0%,rgba(67,20,7,.72) 52%,rgba(17,24,39,.18) 100%);"></div>
 
-{{-- ══════════════════════════════════════════════
-     HERO — VITRINE DIGITAL
-══════════════════════════════════════════════ --}}
-<section class="max-w-7xl mx-auto px-4 py-6">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 h-auto lg:h-[350px]">
-
-        {{-- Hero Principal --}}
-        <div class="lg:col-span-9 rounded-2xl overflow-hidden relative group shadow-lg">
-            <div class="absolute inset-0 bg-gradient-to-br from-orange-600 to-orange-400">
-                <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80"
-                    class="w-full h-full object-cover mix-blend-overlay opacity-40" alt="Vitrine Digital Moçambique">
-            </div>
-            <div class="relative z-10 h-full flex flex-col justify-center px-12 space-y-4">
-                <span class="inline-flex text-[10px] font-black uppercase tracking-[0.2em] bg-white text-orange-600 px-3 py-1 rounded-full w-fit">
-                    Vitrine Digital de Moçambique
-                </span>
-                <h2 class="text-4xl lg:text-5xl font-black text-white leading-tight">
-                    Encontre qualquer<br>produto em <span class="text-orange-100">Moçambique</span>
-                </h2>
-                <p class="text-white/80 text-sm max-w-lg">Descubra lojas locais de Maputo a Nampula e contacte directamente pelo WhatsApp.</p>
-                <div class="flex gap-4 pt-2">
-                    <a href="{{ route('products') }}" class="bg-white text-orange-600 px-8 py-3 rounded-xl text-sm font-bold w-fit shadow-lg hover:bg-orange-50 transition-all">
-                        Explorar Produtos
-                    </a>
-                    <a href="{{ route('register.show') }}" class="border-2 border-white text-white px-8 py-3 rounded-xl text-sm font-bold w-fit hover:bg-white hover:text-orange-600 transition-all">
-                        Criar Minha Loja
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        {{-- Sidebar Cards --}}
-        <div class="lg:col-span-3 flex flex-col gap-4">
-            {{-- Destaque --}}
-            <div class="flex-1 rounded-2xl p-5 relative overflow-hidden group shadow-md border border-orange-200" style="background:#FFF7ED">
-                <div class="relative z-10 space-y-2">
-                    <p class="text-[10px] font-bold text-orange-600 uppercase tracking-widest">Destaque</p>
-                    <h3 class="font-bold leading-tight text-gray-900">Produtos Locais</h3>
-                    <p class="text-xs text-gray-500">Qualidade e Tradição Moçambicana</p>
-                    <a href="{{ route('products') }}" class="inline-block mt-2 text-xs font-bold text-orange-600 border-b border-orange-500 pb-0.5 hover:text-orange-700">Ver Destaques</a>
-                </div>
-                <div class="absolute right-[-10px] bottom-[-10px] opacity-10">
-                    <svg viewBox="0 0 24 24" class="w-32 h-32 fill-current text-orange-400">
-                        <path d="M12 2L1 21h22L12 2z" />
-                    </svg>
-                </div>
-            </div>
-            {{-- CTA Vendedores --}}
-            <div class="flex-1 bg-orange-500 rounded-2xl p-5 flex flex-col justify-center shadow-md text-white">
-                <h3 class="font-bold text-sm leading-tight">Queres vender aqui?</h3>
-                <p class="text-xs mt-1 mb-3 opacity-90">Cria a tua montra digital hoje mesmo.</p>
-                <a href="{{ route('register.show') }}" class="bg-white text-orange-600 px-4 py-2 rounded-lg text-[10px] font-black uppercase w-fit hover:bg-orange-50 transition-colors">
-                    Criar Minha Loja
+        <div class="position-relative d-flex flex-column justify-content-center px-4 px-sm-5 py-5" style="min-height:390px;max-width:42rem;">
+            <span class="d-inline-flex align-items-center gap-2 mb-4 rounded-pill border border-light border-opacity-25 bg-white bg-opacity-10 px-3 py-2 fw-bold text-uppercase align-self-start" style="font-size:.6875rem;letter-spacing:.16em;color:#ffedd5;backdrop-filter:blur(4px);">
+                <i class="bi bi-star-fill"></i>Feito em Moçambique
+            </span>
+            <h1 class="display-5 fw-bolder lh-1 text-white">O que procura está mais perto.</h1>
+            <p class="mt-3 text-white-50" style="max-width:32rem;">Descubra produtos e contacte lojas locais directamente.</p>
+            <div class="mt-4 d-flex flex-wrap gap-3">
+                <a href="{{ route('products') }}" class="btn btn-primary fw-bold d-inline-flex align-items-center gap-2 px-4 py-2">
+                    Explorar produtos <i class="bi bi-arrow-right"></i>
+                </a>
+                <a href="{{ route('entities.index') }}" class="btn btn-outline-light fw-semibold px-4 py-2">Ver lojas</a>
+                <a href="{{ route('register.show') }}" class="btn btn-link text-warning fw-semibold text-decoration-none d-inline-flex align-items-center gap-1 px-2 py-2">
+                    Vender na plataforma <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
         </div>
     </div>
 </section>
 
-{{-- ══════════════════════════════════════════════
-     PROPOSTA DE VALOR — COMO FUNCIONA
-══════════════════════════════════════════════ --}}
-<section style="background:#FFF7ED">
-    <div class="max-w-7xl mx-auto px-4 py-12">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            {{-- Passo 1 --}}
-            <div class="flex flex-col items-center gap-3">
-                <div class="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+<section class="border-top border-bottom border-warning-subtle" style="background:rgba(255,255,255,.65);">
+    <div class="app-container py-4">
+        @php
+            $steps = [
+                ['title' => 'Pesquise', 'text' => 'Encontre o que precisa.', 'icon' => 'bi-search'],
+                ['title' => 'Compare', 'text' => 'Veja preços e detalhes.', 'icon' => 'bi-arrow-left-right'],
+                ['title' => 'Contacte', 'text' => 'Fale directo com a loja.', 'icon' => 'bi-telephone'],
+            ];
+        @endphp
+        <div class="row g-4">
+            @foreach ($steps as $step)
+                <div class="col-sm-4">
+                    <div class="d-flex align-items-center gap-3 justify-content-sm-center">
+                        <div class="d-flex align-items-center justify-content-center rounded-3 text-primary flex-shrink-0" style="width:2.75rem;height:2.75rem;background:#fff7ed;">
+                            <i class="bi {{ $step['icon'] }} fs-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="small fw-bold mb-0">{{ $step['title'] }}</h3>
+                            <p class="text-muted mb-0" style="font-size:.75rem;">{{ $step['text'] }}</p>
+                        </div>
+                    </div>
                 </div>
-                <h3 class="text-sm font-black text-gray-900 uppercase tracking-wide">Descubra</h3>
-                <p class="text-xs text-gray-500 max-w-[200px]">Pesquise produtos e serviços de todo o país</p>
-            </div>
-            {{-- Passo 2 --}}
-            <div class="flex flex-col items-center gap-3">
-                <div class="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                    </svg>
-                </div>
-                <h3 class="text-sm font-black text-gray-900 uppercase tracking-wide">Encontre o Produto</h3>
-                <p class="text-xs text-gray-500 max-w-[200px]">Veja fotos, preços e detalhes do que precisa</p>
-            </div>
-            {{-- Passo 3 --}}
-            <div class="flex flex-col items-center gap-3">
-                <div class="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                    </svg>
-                </div>
-                <h3 class="text-sm font-black text-gray-900 uppercase tracking-wide">Contacte Directamente</h3>
-                <p class="text-xs text-gray-500 max-w-[200px]">Fale com o vendedor pelo WhatsApp ou telefone</p>
-            </div>
+            @endforeach
         </div>
     </div>
 </section>
 
-{{-- ══════════════════════════════════════════════
-     PRODUTOS EM DESTAQUE
-══════════════════════════════════════════════ --}}
-<section class="max-w-7xl mx-auto px-4 py-14">
-    <div class="flex items-center justify-between mb-8">
+<section class="app-container py-5">
+    <div class="mb-4 d-flex align-items-end justify-content-between gap-3">
         <div>
-            <h2 class="text-2xl font-bold text-gray-900">Produtos em Destaque</h2>
-            <div class="h-1 w-12 bg-orange-600 mt-2 rounded-full"></div>
+            <p class="fw-bold text-uppercase text-primary mb-0" style="font-size:.625rem;letter-spacing:.18em;">Novidades</p>
+            <h2 class="mt-1 fs-3 fw-bold mb-0">Produtos recentes</h2>
         </div>
-        <a href="{{ route('products') }}" class="text-sm text-orange-600 hover:text-orange-700 font-medium">Ver todos os produtos →</a>
+        <a href="{{ route('products') }}" class="d-inline-flex align-items-center gap-1 small fw-semibold link-secondary text-decoration-none">
+            Ver todos <i class="bi bi-arrow-right"></i>
+        </a>
     </div>
 
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-        @foreach ($recent->take(8) as $product)
-        <div class="bg-white rounded-xl border border-orange-100 overflow-hidden hover:shadow-md transition-shadow">
-            <div class="h-48 bg-orange-50 relative overflow-hidden">
-                @php
-                $primary = method_exists($product, 'primaryImage') ? $product->primaryImage() : null;
-                $imgPath = $primary?->path ?? $product->image_path ?? null;
-                $imgDisplay = null;
-                if ($imgPath) {
-                $clean = ltrim($imgPath, '/');
-                $small = preg_replace('/(\.[a-zA-Z0-9]+)$/', '_sm$1', $clean);
-                $imgDisplay = file_exists(public_path($small)) ? $small : $clean;
-                }
-                @endphp
-                @if ($imgDisplay)
-                <img src="/{{ $imgDisplay }}" alt="{{ $product->name }}" loading="lazy"
-                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                @else
-                <div class="w-full h-full flex flex-col items-center justify-center">
-                    <svg class="w-12 h-12 text-orange-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                    </svg>
-                    <span class="text-orange-300 text-xs mt-2">Sem foto</span>
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
+        @forelse ($recent->take(8) as $product)
+            <div class="col"><x-product-card :product="$product" /></div>
+        @empty
+            <div class="col-12">
+                <div class="rounded-4 border border-dashed bg-white px-4 py-5 text-center small text-muted">
+                    Ainda não há produtos publicados.
                 </div>
-                @endif
             </div>
-
-            <div class="p-3">
-                @if ($product->entity)
-                <p class="text-xs text-gray-400 mb-1">{{ $product->entity->name }}</p>
-                @endif
-
-                <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 mb-2 min-h-[2.5rem]">
-                    {{ $product->name }}
-                </h3>
-
-                @if ($product->price)
-                <p class="text-orange-600 font-bold text-sm mb-3">
-                    {{ number_format($product->price, 2, ',', '.') }} MT
-                </p>
-                @else
-                <p class="text-gray-400 text-xs italic mb-3">Preço sob consulta</p>
-                @endif
-
-                <a href="{{ route('product.show', $product->slug) }}"
-                    class="block w-full text-center bg-orange-500 hover:bg-orange-600
-                          text-white text-sm font-medium py-2 rounded-lg transition-colors">
-                    Contactar Vendedor
-                </a>
-            </div>
-        </div>
-        @endforeach
+        @endforelse
     </div>
 </section>
 
-{{-- ══════════════════════════════════════════════
-     LOJAS PARCEIRAS
-══════════════════════════════════════════════ --}}
 @if ($entities->isNotEmpty())
-<section class="max-w-7xl mx-auto px-4 mt-4 mb-12">
-    <div class="flex items-center justify-between mb-5">
-        <h2 class="text-lg font-bold text-gray-900">Lojas Parceiras</h2>
-        <a href="{{ route('entities.index') }}" class="text-sm text-orange-600 hover:text-orange-700 font-medium">Ver todas as lojas →</a>
-    </div>
-    <div class="flex items-center gap-6 flex-wrap">
-        @foreach ($entities->take(6) as $entity)
-        <a href="{{ route('entity.show', $entity->slug) }}" class="group flex flex-col items-center gap-2" title="{{ $entity->name }}">
-            @if ($entity->logo_path && file_exists(public_path(ltrim($entity->logo_path, '/'))))
-            <div class="w-16 h-16 rounded-full overflow-hidden border-2 border-orange-100 group-hover:border-orange-400 transition-colors shadow-sm">
-                <img src="/{{ ltrim($entity->logo_path, '/') }}" alt="{{ $entity->name }}"
-                    class="w-full h-full object-cover">
-            </div>
-            @else
-            <div class="w-16 h-16 rounded-full bg-orange-50 border-2 border-orange-100 group-hover:border-orange-400 flex items-center justify-center transition-colors shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-orange-300 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
-            </div>
-            @endif
-            <span class="text-[10px] text-gray-500 font-medium max-w-[70px] truncate text-center group-hover:text-orange-600 transition-colors">{{ $entity->name }}</span>
-        </a>
-        @endforeach
+<section class="app-container pb-5">
+    <div class="rounded-4 border bg-white px-4 py-4 px-sm-5">
+        <div class="d-flex align-items-center justify-content-between gap-3">
+            <h2 class="fs-5 fw-bold mb-0">Lojas em destaque</h2>
+            <a href="{{ route('entities.index') }}" class="small fw-semibold link-primary text-decoration-none">Ver lojas</a>
+        </div>
+        <div class="row row-cols-3 row-cols-sm-6 g-4 mt-2">
+            @foreach ($entities->take(6) as $entity)
+                <div class="col">
+                    <a href="{{ route('entity.show', $entity->slug) }}" class="d-block text-center text-decoration-none store-logo" title="{{ $entity->name }}">
+                        <div class="mx-auto d-flex align-items-center justify-content-center overflow-hidden rounded-3 border bg-light" style="width:4rem;height:4rem;">
+                            @if ($entity->logo_path && file_exists(public_path(ltrim($entity->logo_path, '/'))))
+                                <img src="/{{ ltrim($entity->logo_path, '/') }}" alt="{{ $entity->name }}" class="w-100 h-100 object-fit-cover">
+                            @else
+                                <i class="bi bi-shop fs-4 text-secondary"></i>
+                            @endif
+                        </div>
+                        <span class="mt-2 d-block text-truncate small fw-medium text-muted">{{ $entity->name }}</span>
+                    </a>
+                </div>
+            @endforeach
+        </div>
     </div>
 </section>
 @endif
-
-{{-- ══════════════════════════════════════════════
-     TODOS OS PRODUTOS
-══════════════════════════════════════════════ --}}
-<section class="max-w-7xl mx-auto px-4 mt-12 mb-8">
-    <div class="flex items-center justify-between mb-5">
-        <h2 class="text-xl font-bold text-gray-900">Todos os Produtos</h2>
-    </div>
-    @include('partials.product-grid-paginated', ['paginator' => $products])
-</section>
-
 @endsection

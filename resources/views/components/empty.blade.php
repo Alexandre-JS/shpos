@@ -5,14 +5,13 @@
     'action' => null,
 ])
 
-<div
-    class="flex flex-col items-center justify-center text-center py-14 px-6 border border-dashed border-gray-300 rounded-lg bg-white/60">
-    <div class="text-4xl mb-3 select-none">{{ $icon }}</div>
-    <h3 class="font-medium text-base">{{ $title }}</h3>
+<div class="d-flex flex-column align-items-center justify-content-center text-center py-5 px-4 border border-dashed rounded bg-white bg-opacity-75">
+    <div class="display-5 mb-3 user-select-none">{{ $icon }}</div>
+    <h3 class="fw-medium fs-6 mb-0">{{ $title }}</h3>
     @if ($subtitle)
-        <p class="mt-1 text-sm text-base-content/60 max-w-md">{{ $subtitle }}</p>
+        <p class="mt-1 small text-muted mb-0" style="max-width:28rem;">{{ $subtitle }}</p>
     @endif
     @if ($action)
-        <div class="mt-4">{{ $action }}</div>
+        <div class="mt-3">{{ $action }}</div>
     @endif
 </div>

@@ -1,110 +1,100 @@
 @extends('layouts.admin')
 @section('title', 'Empresas / Lojas')
 @section('header', 'Empresas e Lojas')
-@section('nav.admin.entities', 'bg-gray-800 text-white')
+@section('nav.admin.entities', 'active')
 
 @section('content')
 
 {{-- Tabs de estado --}}
-<div class="flex gap-1 text-sm">
+<ul class="nav nav-tabs">
     @foreach(['pending' => 'Pendentes', 'approved' => 'Aprovadas', 'rejected' => 'Rejeitadas'] as $s => $label)
-        <a href="{{ route('admin.entities.index', ['status' => $s, 'q' => $q]) }}"
-           class="px-4 py-2 rounded-t border-b-2 font-medium
-               {{ $status === $s
-                   ? 'border-gray-900 text-gray-900 bg-white'
-                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-white' }}">
-            {{ $label }}
-            @if($counts[$s] > 0)
-                <span class="ml-1 text-xs {{ $s === 'pending' ? 'text-amber-600 font-bold' : 'text-gray-400' }}">
-                    ({{ $counts[$s] }})
-                </span>
-            @endif
-        </a>
+        <li class="nav-item">
+            <a href="{{ route('admin.entities.index', ['status' => $s, 'q' => $q]) }}" class="nav-link {{ $status === $s ? 'active' : '' }}">
+                {{ $label }}
+                @if($counts[$s] > 0)
+                    <span class="ms-1 small {{ $s === 'pending' ? 'text-warning-emphasis fw-bold' : 'text-muted' }}">({{ $counts[$s] }})</span>
+                @endif
+            </a>
+        </li>
     @endforeach
-</div>
+</ul>
 
-<div class="bg-white rounded border -mt-px">
+<div class="card border-top-0 rounded-top-0">
 
     {{-- Barra de pesquisa --}}
-    <div class="p-3 border-b">
-        <form method="GET" action="{{ route('admin.entities.index') }}" class="flex gap-2">
+    <div class="card-header bg-white">
+        <form method="GET" action="{{ route('admin.entities.index') }}" class="d-flex gap-2">
             <input type="hidden" name="status" value="{{ $status }}" />
-            <input type="text" name="q" value="{{ $q }}"
-                   placeholder="Pesquisar por nome ou cidade..."
-                   class="flex-1 border rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400" />
-            <button class="px-3 py-1.5 bg-gray-800 text-white text-sm rounded hover:bg-gray-700">Pesquisar</button>
+            <input type="text" name="q" value="{{ $q }}" placeholder="Pesquisar por nome ou cidade..." class="form-control form-control-sm" />
+            <button class="btn btn-dark btn-sm">Pesquisar</button>
             @if($q)
-                <a href="{{ route('admin.entities.index', ['status' => $status]) }}"
-                   class="px-3 py-1.5 border text-sm rounded hover:bg-gray-50">Limpar</a>
+                <a href="{{ route('admin.entities.index', ['status' => $status]) }}" class="btn btn-outline-secondary btn-sm">Limpar</a>
             @endif
         </form>
     </div>
 
     @if($entities->isEmpty())
-        <p class="text-sm text-gray-400 p-6 text-center">Nenhuma empresa encontrada.</p>
+        <p class="small text-muted p-5 text-center mb-0">Nenhuma empresa encontrada.</p>
     @else
-        <div class="divide-y">
+        <ul class="list-group list-group-flush">
             @foreach($entities as $entity)
-                <div class="p-4 flex flex-col sm:flex-row sm:items-center gap-4">
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <p class="font-semibold">{{ $entity->name }}</p>
+                <li class="list-group-item p-4 d-flex flex-column flex-sm-row align-items-sm-center gap-3">
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <p class="fw-semibold mb-0">{{ $entity->name }}</p>
                             @if($entity->is_featured)
-                                <span class="text-[10px] bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded">Destaque</span>
+                                <span class="badge text-bg-warning" style="font-size:.625rem;">Destaque</span>
                             @endif
                             @if(!$entity->is_active && $entity->status === 'approved')
-                                <span class="text-[10px] bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded">Desactivada</span>
+                                <span class="badge text-bg-secondary" style="font-size:.625rem;">Desactivada</span>
                             @endif
-                            <span class="text-[10px] border px-1.5 py-0.5 rounded text-gray-500">{{ ucfirst($entity->plan_type) }}</span>
+                            <span class="badge text-bg-light border text-muted" style="font-size:.625rem;">{{ ucfirst($entity->plan_type) }}</span>
                         </div>
-                        <p class="text-xs text-gray-500 mt-0.5">
+                        <p class="small text-muted mt-1 mb-0">
                             {{ $entity->user->email }} &bull; {{ $entity->location_city }}
                             @if($entity->location_district) · {{ $entity->location_district }} @endif
                         </p>
-                        <p class="text-xs text-gray-400 mt-0.5">
+                        <p class="small text-muted mt-1 mb-0">
                             {{ $entity->products_count }} produto(s) &bull; Registado {{ $entity->created_at->format('d/m/Y') }}
                         </p>
                     </div>
 
-                    <div class="flex flex-wrap gap-2 shrink-0 text-xs">
-                        <a href="{{ route('admin.entities.edit', $entity) }}"
-                           class="border rounded px-3 py-1.5 hover:bg-gray-50">Editar</a>
-                        <a href="{{ route('entity.show', $entity->slug) }}" target="_blank"
-                           class="border rounded px-3 py-1.5 hover:bg-gray-50">Ver perfil</a>
+                    <div class="d-flex flex-wrap gap-2 flex-shrink-0">
+                        <a href="{{ route('admin.entities.edit', $entity) }}" class="btn btn-outline-secondary btn-sm">Editar</a>
+                        <a href="{{ route('entity.show', $entity->slug) }}" target="_blank" class="btn btn-outline-secondary btn-sm">Ver perfil</a>
 
                         @if($entity->status !== 'approved')
-                            <form method="POST" action="{{ route('admin.entities.approve', $entity) }}">
+                            <form method="POST" action="{{ route('admin.entities.approve', $entity) }}" class="m-0">
                                 @csrf @method('PUT')
-                                <button class="bg-green-600 text-white rounded px-3 py-1.5 hover:bg-green-700">Aprovar</button>
+                                <button class="btn btn-success btn-sm">Aprovar</button>
                             </form>
                         @endif
                         @if($entity->status !== 'rejected')
-                            <form method="POST" action="{{ route('admin.entities.reject', $entity) }}">
+                            <form method="POST" action="{{ route('admin.entities.reject', $entity) }}" class="m-0">
                                 @csrf @method('PUT')
-                                <button class="bg-orange-500 text-white rounded px-3 py-1.5 hover:bg-orange-600"
-                                    onclick="return confirm('Rejeitar «{{ $entity->name }}»?')">Rejeitar</button>
+                                <button class="btn btn-warning btn-sm" onclick="return confirm('Rejeitar «{{ $entity->name }}»?')">Rejeitar</button>
                             </form>
                         @endif
 
-                        <form method="POST" action="{{ route('admin.entities.toggle', $entity) }}">
+                        <form method="POST" action="{{ route('admin.entities.toggle', $entity) }}" class="m-0">
                             @csrf @method('PUT')
-                            <button class="{{ $entity->is_active ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' : 'bg-blue-600 text-white hover:bg-blue-700' }} rounded px-3 py-1.5">
+                            <button class="btn btn-sm {{ $entity->is_active ? 'btn-outline-secondary' : 'btn-primary' }}">
                                 {{ $entity->is_active ? 'Desactivar' : 'Activar' }}
                             </button>
                         </form>
 
-                        <form method="POST" action="{{ route('admin.entities.destroy', $entity) }}">
+                        <form method="POST" action="{{ route('admin.entities.destroy', $entity) }}" class="m-0">
                             @csrf @method('DELETE')
-                            <button class="bg-red-600 text-white rounded px-3 py-1.5 hover:bg-red-700"
+                            <button class="btn btn-danger btn-sm"
                                 onclick="return confirm('Eliminar permanentemente «{{ $entity->name }}»? Esta acção não pode ser revertida.')">
                                 Eliminar
                             </button>
                         </form>
                     </div>
-                </div>
+                </li>
             @endforeach
-        </div>
-        <div class="p-3 border-t">{{ $entities->links() }}</div>
+        </ul>
+        <div class="card-footer bg-white">{{ $entities->links() }}</div>
     @endif
 </div>
 @endsection

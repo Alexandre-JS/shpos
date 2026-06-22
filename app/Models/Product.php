@@ -69,6 +69,25 @@ class Product extends Model
         return $query->where('is_active', true);
     }
 
+    public function scopePubliclyVisible($query)
+    {
+        return $query->active()
+            ->whereHas('entity', fn ($entity) => $entity->publiclyVisible());
+    }
+
+    public function isPubliclyVisible(): bool
+    {
+        return $this->is_active && $this->entity?->isPubliclyVisible() === true;
+    }
+
+    public function publicRouteParameters(): array
+    {
+        return [
+            'entity' => $this->entity->slug,
+            'product' => $this->slug,
+        ];
+    }
+
     public function scopeProducts($query)
     {
         return $query->where('type', 'product');

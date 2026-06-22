@@ -44,6 +44,7 @@ class Entity extends Model
     public function isPending(): bool  { return $this->status === self::STATUS_PENDING; }
     public function isApproved(): bool { return $this->status === self::STATUS_APPROVED; }
     public function isRejected(): bool { return $this->status === self::STATUS_REJECTED; }
+    public function isPubliclyVisible(): bool { return $this->isApproved() && $this->is_active; }
 
     // Normaliza número de WhatsApp ao definir (remove não dígitos, garante prefixo 258 se faltar e tamanho padrão)
     public function setWhatsappAttribute($value): void
@@ -89,6 +90,11 @@ class Entity extends Model
 
     // Scopes
     public function scopeActive($query)
+    {
+        return $query->publiclyVisible();
+    }
+
+    public function scopePubliclyVisible($query)
     {
         return $query->where('is_active', true)->where('status', self::STATUS_APPROVED);
     }

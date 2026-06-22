@@ -1,38 +1,36 @@
-@extends('layouts.app')
+@extends('layouts.auth')
+@section('title', 'Entrar')
 
 @section('content')
-    <div class="max-w-md mx-auto py-12">
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold">Entrar</h1>
-            <p class="text-sm text-gray-500 mt-1">Acesse o painel da sua entidade</p>
+        <div class="text-center text-white">
+            <h1 class="fs-3 fw-bold mb-1">Entrar</h1>
+            <p class="small mb-0 text-white-50">Acesse o painel da sua entidade</p>
         </div>
         @if ($errors->any())
-            <div class="alert alert-error mb-6 text-sm">
-                <span>{{ $errors->first() }}</span>
-            </div>
+            <div class="alert alert-danger small mb-0">{{ $errors->first() }}</div>
         @endif
-        <form method="POST" action="{{ route('login.perform') }}" class="card shadow p-8 space-y-6">
-            @csrf
-            <div class="space-y-1">
-                <label for="email" class="text-xs font-medium text-gray-600">Email</label>
-                <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus
-                    class="input" />
-            </div>
-            <div class="space-y-1">
-                <label for="password" class="text-xs font-medium text-gray-600">Password</label>
-                <input id="password" type="password" name="password" required class="input" />
-            </div>
-            <div class="flex items-center gap-2">
-                <input type="checkbox" name="remember" id="remember" class="h-4 w-4 rounded border-gray-300" />
-                <label for="remember" class="text-sm text-gray-600">Lembrar-me</label>
-            </div>
-            <div class="flex justify-between items-center pt-2 text-sm">
-                <a href="{{ route('register.show') }}" class="link link-primary">Criar conta</a>
-                <button class="btn btn-primary">Entrar</button>
-            </div>
-            <div class="text-center text-sm">
-                <a href="{{ route('password.request') }}" class="text-gray-500 hover:underline">Esqueci a password</a>
+        <form method="POST" action="{{ route('login.perform') }}" class="card shadow-sm">
+            <div class="card-body p-4 vstack gap-3">
+                @csrf
+                <div>
+                    <label for="email" class="form-label small fw-medium text-muted">Email</label>
+                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus class="form-control" />
+                </div>
+                <div>
+                    <label for="password" class="form-label small fw-medium text-muted">Password</label>
+                    <input id="password" type="password" name="password" required class="form-control" />
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" name="remember" id="remember" class="form-check-input" />
+                    <label for="remember" class="form-check-label small">Lembrar-me</label>
+                </div>
+                <div class="d-flex justify-content-between align-items-center pt-1">
+                    <a href="{{ route('register.show') }}" class="link-primary text-decoration-none small">Criar conta</a>
+                    <button class="btn btn-primary">Entrar</button>
+                </div>
+                <div class="text-center small">
+                    <a href="{{ route('password.request') }}" class="link-secondary text-decoration-none">Esqueci a password</a>
+                </div>
             </div>
         </form>
-    </div>
 @endsection

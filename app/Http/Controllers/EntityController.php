@@ -34,7 +34,7 @@ class EntityController extends Controller
     }
     public function show(Entity $entity)
     {
-        abort_unless($entity->is_active, 404);
+        abort_unless($entity->isPubliclyVisible(), 404);
         $entity->load(['products' => function ($q) {
             $q->active()->orderByDesc('created_at');
         }]);

@@ -1,43 +1,40 @@
-@extends('layouts.app')
+@extends('layouts.auth')
 
 @section('title', 'Nova Password')
 
 @section('content')
-    <div class="max-w-md mx-auto py-12">
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold">Nova Password</h1>
-            <p class="text-sm text-gray-500 mt-1">Escolhe uma nova password para a tua conta.</p>
+        <div class="text-center text-white">
+            <h1 class="fs-3 fw-bold mb-1">Nova Password</h1>
+            <p class="small text-white-50 mb-0">Escolhe uma nova password para a tua conta.</p>
         </div>
 
         @if ($errors->any())
-            <div class="mb-6 bg-red-100 text-red-700 p-3 rounded text-sm">
-                {{ $errors->first() }}
-            </div>
+            <div class="alert alert-danger small mb-0">{{ $errors->first() }}</div>
         @endif
 
-        <form method="POST" action="{{ route('password.update') }}" class="card shadow p-8 space-y-6">
-            @csrf
-            <input type="hidden" name="token" value="{{ $token }}" />
+        <form method="POST" action="{{ route('password.update') }}" class="card shadow-sm">
+            <div class="card-body p-4 vstack gap-3">
+                @csrf
+                <input type="hidden" name="token" value="{{ $token }}" />
 
-            <div class="space-y-1">
-                <label for="email" class="text-xs font-medium text-gray-600">Email</label>
-                <input id="email" type="email" name="email" value="{{ old('email', request('email')) }}"
-                    required autofocus class="input" />
-            </div>
+                <div>
+                    <label for="email" class="form-label small fw-medium text-muted">Email</label>
+                    <input id="email" type="email" name="email" value="{{ old('email', request('email')) }}" required autofocus class="form-control" />
+                </div>
 
-            <div class="space-y-1">
-                <label for="password" class="text-xs font-medium text-gray-600">Nova Password</label>
-                <input id="password" type="password" name="password" required class="input" />
-            </div>
+                <div>
+                    <label for="password" class="form-label small fw-medium text-muted">Nova Password</label>
+                    <input id="password" type="password" name="password" required class="form-control" />
+                </div>
 
-            <div class="space-y-1">
-                <label for="password_confirmation" class="text-xs font-medium text-gray-600">Confirmar Password</label>
-                <input id="password_confirmation" type="password" name="password_confirmation" required class="input" />
-            </div>
+                <div>
+                    <label for="password_confirmation" class="form-label small fw-medium text-muted">Confirmar Password</label>
+                    <input id="password_confirmation" type="password" name="password_confirmation" required class="form-control" />
+                </div>
 
-            <div class="flex justify-end pt-2">
-                <button class="btn btn-primary">Redefinir Password</button>
+                <div class="d-flex justify-content-end pt-1">
+                    <button class="btn btn-primary">Redefinir Password</button>
+                </div>
             </div>
         </form>
-    </div>
 @endsection

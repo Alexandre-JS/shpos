@@ -6,7 +6,7 @@ $orig = $primary?->path ?? $product->image_path;
 $display = null;
 if ($orig) {
 $clean = ltrim($orig, '/');
-$small = preg_replace('/(\.[a-zA-Z0-9]+)$/', '_sm$1', $clean);
+$small = preg_replace('/(?:_lg)?(\.[a-zA-Z0-9]+)$/', '_sm$1', $clean);
 $display = file_exists(public_path($small)) ? $small : $clean;
 }
 
@@ -23,68 +23,55 @@ if ($hours < 0 && abs($hours) < 48) {
     }
     @endphp
 
-    <a href="{{ route('product.show', $product->slug) }}"
-        class="group flex flex-col bg-white rounded-xl border border-gray-100 hover:border-orange-200 hover:shadow-md transition-all duration-200 overflow-hidden">
+    <a href="{{ route('product.show', $product->publicRouteParameters()) }}"
+        class="card h-100 text-decoration-none product-card overflow-hidden">
 
         {{-- Imagem do produto --}}
-        <div class="relative aspect-square bg-gray-50 overflow-hidden">
+        <div class="position-relative ratio ratio-1x1 bg-light overflow-hidden">
             @if ($display)
             <img src="/{{ $display }}" alt="{{ $product->name }}" loading="lazy"
-                class="w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-300" />
+                class="w-100 h-100 object-fit-contain p-3" />
             @else
-            <div class="flex flex-col items-center justify-center h-full gap-2 bg-orange-50">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-orange-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
-                <span class="text-orange-300 text-xs">Sem foto ainda</span>
+            <div class="d-flex flex-column align-items-center justify-content-center h-100 gap-2" style="background:#fff7ed;">
+                <i class="bi bi-bag fs-1 text-primary opacity-50"></i>
+                <span class="text-primary opacity-75 small">Sem foto ainda</span>
             </div>
             @endif
 
             {{-- Badge de desconto --}}
             @if ($hasDiscount && $discountPct > 0)
-            <span class="absolute top-2 left-2 text-[10px] font-bold text-white px-2 py-0.5 rounded-md"
-                style="background:var(--color-accent)">
+            <span class="position-absolute top-0 start-0 m-2 badge text-bg-secondary" style="font-size:.625rem;">
                 -{{ round($discountPct) }}%
-            </span>
-            @endif
-
-            {{-- Categoria --}}
-            @if ($product->category)
-            <span class="absolute top-2 right-2 text-[9px] font-medium bg-white/80 backdrop-blur-sm text-gray-600 px-2 py-0.5 rounded-full border border-gray-100">
-                {{ $product->category->name }}
             </span>
             @endif
 
             {{-- Badge urgência --}}
             @if ($expireLabel)
-            <span class="absolute bottom-2 left-2 text-[9px] font-medium bg-red-500 text-white px-2 py-0.5 rounded">
+            <span class="position-absolute bottom-0 start-0 m-2 badge text-bg-danger" style="font-size:.5625rem;">
                 {{ $expireLabel }}
             </span>
             @endif
 
             {{-- Entrega disponível --}}
             @if ($product->has_delivery ?? false)
-            <span class="absolute bottom-2 right-2 text-[9px] font-medium bg-green-600 text-white px-2 py-0.5 rounded flex items-center gap-0.5">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
-                Entrega
+            <span class="position-absolute bottom-0 end-0 m-2 badge text-bg-success d-flex align-items-center gap-1" style="font-size:.5625rem;">
+                <i class="bi bi-truck"></i>Entrega
             </span>
             @endif
         </div>
 
         {{-- Informação do produto --}}
-        <div class="flex flex-col flex-1 px-3 py-3 gap-1">
+        <div class="card-body d-flex flex-column p-3 gap-1">
 
             {{-- Loja (se showEntity) --}}
             @if ($showEntity && $product->entity)
-            <span class="text-[10px] text-gray-400 uppercase tracking-wide truncate">
+            <span class="text-muted text-uppercase text-truncate" style="font-size:.625rem;letter-spacing:.05em;">
                 {{ $product->entity->name }}
             </span>
             @endif
 
             {{-- Nome --}}
-            <h3 class="text-sm font-medium leading-snug line-clamp-2 text-gray-800 group-hover:text-orange-600 transition-colors min-h-[2.5rem]">
+            <h3 class="small fw-medium lh-sm truncate-2 text-body mb-0" style="min-height:2.5rem;">
                 {{ $product->name }}
             </h3>
 
@@ -92,21 +79,21 @@ if ($hours < 0 && abs($hours) < 48) {
             <div class="mt-auto pt-2">
                 @if (!is_null($product->price))
                 @if ($hasDiscount)
-                <div class="flex items-baseline gap-1.5 flex-wrap">
-                    <span class="text-base font-bold" style="color:var(--color-accent)">
+                <div class="d-flex align-items-baseline gap-2 flex-wrap">
+                    <span class="fs-6 fw-bold text-secondary">
                         {{ number_format($product->discountedPrice(), 2, ',', '.') }} MT
                     </span>
-                    <span class="text-xs line-through text-gray-400">
+                    <span class="small text-decoration-line-through text-muted">
                         {{ number_format($product->price, 2, ',', '.') }} MT
                     </span>
                 </div>
                 @else
-                <span class="text-base font-bold" style="color:var(--color-accent)">
+                <span class="fs-6 fw-bold text-secondary">
                     {{ number_format($product->price, 2, ',', '.') }} MT
                 </span>
                 @endif
                 @else
-                <span class="text-xs text-gray-400 italic">Preço sob consulta</span>
+                <span class="small text-muted fst-italic">Preço sob consulta</span>
                 @endif
             </div>
         </div>

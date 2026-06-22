@@ -16,8 +16,8 @@ $ogImg = $primaryImg
 @endif
 @endpush
 @section('content')
-<x-app-container class="max-w-5xl space-y-8">
-    <div class="space-y-4">
+<x-app-container class="py-4 vstack gap-4" style="max-width:64rem;">
+    <div>
         <x-breadcrumb :items="array_filter([
                 ['label' => 'Home', 'url' => route('home')],
                 $product->category
@@ -44,150 +44,126 @@ $ogImg = $primaryImg
     : '/' . $product->image_path;
     }
     @endphp
-    <div class="flex flex-col md:flex-row gap-8">
-        <div class="md:w-1/2 order-1"
+    <div class="row g-4">
+        <div class="col-md-6"
             x-data='productGallery({
                 images: @json($galleryImages),
                 fallback: @json($fallbackImage),
                 name: @json($product->name)
             })'>
-            <div class="space-y-3">
-                <div class="relative bg-gray-100 flex items-center justify-center rounded overflow-hidden group border"
-                    style="aspect-ratio:1/1">
+            <div class="vstack gap-3">
+                <div class="position-relative bg-light d-flex align-items-center justify-content-center rounded overflow-hidden border" style="aspect-ratio:1/1">
                     <template x-if="current">
                         <img :src="current.path_lg" :alt="current.alt"
-                            class="object-contain w-full h-full transition-transform duration-[7000ms] group-hover:animate-loop-pan"
+                            class="object-fit-contain w-100 h-100"
                             loading="lazy" />
                     </template>
                     <template x-if="!current">
-                        <span class="text-gray-400 text-sm">Sem imagem</span>
+                        <span class="text-muted small">Sem imagem</span>
                     </template>
-                    <div class="absolute top-2 right-2 bg-black/50 text-white text-[10px] px-2 py-0.5 rounded tracking-wide"
+                    <div class="position-absolute top-0 end-0 m-2 text-white px-2 py-1 rounded" style="background:rgba(0,0,0,.5);font-size:.625rem;"
                         x-show="images.length > 1" x-transition>
                         <span x-text="index+1"></span>/<span x-text="images.length"></span>
                     </div>
                 </div>
                 <template x-if="images.length > 1">
-                    <div class="flex gap-2 overflow-x-auto pb-1 hide-scrollbar select-none">
+                    <div class="d-flex gap-2 overflow-auto pb-1 hide-scrollbar user-select-none">
                         <template x-for="(img,i) in images" :key="img.id">
                             <button type="button" @click="select(i)"
-                                class="relative shrink-0 w-20 h-20 border rounded overflow-hidden focus:outline-none focus:ring-2 focus:ring-primary/50"
-                                :class="i === index ? 'ring-2 ring-primary border-primary' : 'border-gray-200'">
-                                <img :src="img.path_sm" :alt="img.alt" class="object-cover w-full h-full" />
+                                class="position-relative flex-shrink-0 border rounded overflow-hidden p-0 bg-transparent" style="width:5rem;height:5rem;"
+                                :class="i === index ? 'border-primary border-2' : 'border-secondary-subtle'">
+                                <img :src="img.path_sm" :alt="img.alt" class="object-fit-cover w-100 h-100" />
                             </button>
                         </template>
                     </div>
                 </template>
             </div>
         </div>
-        <div class="md:w-1/2 space-y-5 order-2">
-            <div class="space-y-2">
-                <h1 class="text-2xl md:text-3xl font-bold leading-tight">{{ $product->name }}</h1>
-                <p class="text-xs text-gray-400 mt-1">{{ $product->views_count }} visualizações</p>
-                <div class="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+        <div class="col-md-6 vstack gap-4">
+            <div class="vstack gap-2">
+                <h1 class="fs-2 fw-bold lh-sm mb-0">{{ $product->name }}</h1>
+                <p class="small text-muted mb-0">{{ $product->views_count }} visualizações</p>
+                <div class="d-flex flex-wrap align-items-center gap-2">
                     @if ($product->category?->name)
-                    <span class="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-bold rounded-full">{{ $product->category->name }}</span>
+                    <span class="badge rounded-pill text-bg-warning">{{ $product->category->name }}</span>
                     @endif
                 </div>
                 @if ($product->price)
                 @php $hasDiscount = method_exists($product,'isDiscountActive') && $product->isDiscountActive(); @endphp
                 @if ($hasDiscount)
-                <div class="flex flex-col gap-1">
-                    <div class="flex items-baseline gap-2">
-                        <span class="text-sm line-through text-gray-400">MT
-                            {{ number_format($product->price, 2, ',', '.') }}</span>
-                        <span class="text-2xl font-bold text-orange-600">MT
-                            {{ number_format($product->discountedPrice(), 2, ',', '.') }}</span>
-                        <span
-                            class="inline-block bg-orange-100 text-orange-700 text-xs font-semibold px-2 py-0.5 rounded">-{{ rtrim(rtrim(number_format($product->discountPercent(), 2, ',', '.'), '0'), ',') }}%</span>
+                <div class="vstack gap-1">
+                    <div class="d-flex align-items-baseline gap-2 flex-wrap">
+                        <span class="small text-decoration-line-through text-muted">MT {{ number_format($product->price, 2, ',', '.') }}</span>
+                        <span class="fs-3 fw-bold text-primary">MT {{ number_format($product->discountedPrice(), 2, ',', '.') }}</span>
+                        <span class="badge text-bg-warning">-{{ rtrim(rtrim(number_format($product->discountPercent(), 2, ',', '.'), '0'), ',') }}%</span>
                     </div>
-                    <div class="text-xs text-gray-500">
+                    <div class="small text-muted">
                         Poupa MT {{ number_format($product->discountAmount(), 2, ',', '.') }}
                         @if ($product->discount_ends_at)
-                        <span class="ml-2" x-data="countdown('{{ $product->discount_ends_at->toIso8601String() }}')" x-init="init()">
-                            <span class="text-gray-400">expira em</span>
-                            <span class="font-medium" x-text="timeLeft"></span>
+                        <span class="ms-2" x-data="countdown('{{ $product->discount_ends_at->toIso8601String() }}')" x-init="init()">
+                            <span class="text-muted">expira em</span>
+                            <span class="fw-medium" x-text="timeLeft"></span>
                         </span>
                         @endif
                     </div>
                 </div>
                 @else
-                <p class="text-2xl font-bold text-orange-600">MT
-                    {{ number_format($product->price, 2, ',', '.') }}
-                </p>
+                <p class="fs-3 fw-bold text-primary mb-0">MT {{ number_format($product->price, 2, ',', '.') }}</p>
                 @endif
                 @endif
             </div>
 
             @if($product->description)
-            <div class="mt-4">
-                <h4 class="font-semibold text-gray-700 mb-2">Descrição</h4>
-                <p class="text-gray-600 text-sm leading-relaxed">{{ $product->description }}</p>
+            <div>
+                <h4 class="fw-semibold fs-6 mb-2">Descrição</h4>
+                <p class="text-secondary-emphasis small lh-base mb-0">{{ $product->description }}</p>
             </div>
             @endif
 
-            <div class="border rounded-xl p-5 space-y-4 bg-white shadow-sm">
-                <div class="flex items-center justify-between border-b pb-3">
-                    <h2 class="font-semibold text-gray-800">Vendedor</h2>
-                    <a href="{{ route('entity.show', $product->entity->slug) }}"
-                        class="text-orange-600 text-sm font-medium hover:underline">Ver loja completa →</a>
-                </div>
-                <div class="text-sm">
-                    <p class="font-bold text-gray-900 text-base">{{ $product->entity->name }}</p>
-                    <p class="text-gray-500 flex items-center gap-1 mt-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        {{ $product->entity->location_city }}{{ $product->entity->location_district ? ', ' . $product->entity->location_district : '' }}
-                    </p>
-                </div>
+            <div class="card shadow-sm">
+                <div class="card-body vstack gap-3">
+                    <div class="d-flex align-items-center justify-content-between border-bottom pb-3">
+                        <h2 class="fw-semibold fs-6 mb-0">Vendedor</h2>
+                        <a href="{{ route('entity.show', $product->entity->slug) }}"
+                            class="small fw-medium link-primary text-decoration-none">Ver loja completa →</a>
+                    </div>
+                    <div class="small">
+                        <p class="fw-bold fs-6 mb-1">{{ $product->entity->name }}</p>
+                        <p class="text-muted d-flex align-items-center gap-1 mb-0">
+                            <i class="bi bi-geo-alt"></i>
+                            {{ $product->entity->location_city }}{{ $product->entity->location_district ? ', ' . $product->entity->location_district : '' }}
+                        </p>
+                    </div>
 
-                <div class="space-y-2">
-                    @if ($product->entity->whatsapp)
-                    <a href="https://api.whatsapp.com/send?phone={{ preg_replace('/[^0-9]/', '', $product->entity->whatsapp) }}&text={{ urlencode('Olá, vi este produto no Shops: ' . $product->name . ' (' . url()->current() . ')') }}"
-                        target="_blank"
-                        class="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-xl text-base transition-colors">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-                            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.089.534 4.05 1.472 5.763L0 24l6.395-1.445A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.371l-.36-.214-3.716.839.875-3.601-.235-.371A9.818 9.818 0 012.182 12C2.182 6.58 6.58 2.182 12 2.182S21.818 6.58 21.818 12 17.42 21.818 12 21.818z" />
-                        </svg>
-                        Contactar pelo WhatsApp
-                    </a>
-                    @endif
-
-                    <div class="flex gap-2">
-                        @if($product->entity->phone)
-                        <a href="tel:{{ $product->entity->phone }}"
-                            class="flex-1 text-center border border-gray-200 hover:border-orange-300 text-gray-600 text-sm py-2 rounded-lg transition-colors">
-                            Telefone
+                    <div class="vstack gap-2">
+                        @if ($product->entity->whatsapp)
+                        <a href="https://api.whatsapp.com/send?phone={{ preg_replace('/[^0-9]/', '', $product->entity->whatsapp) }}&text={{ urlencode('Olá, vi este produto no Shops: ' . $product->name . ' (' . url()->current() . ')') }}"
+                            target="_blank"
+                            class="btn btn-success d-flex align-items-center justify-content-center gap-2 py-2">
+                            <i class="bi bi-whatsapp fs-5"></i>Contactar pelo WhatsApp
                         </a>
                         @endif
-                        @if($product->entity->email)
-                        <a href="mailto:{{ $product->entity->email }}"
-                            class="flex-1 text-center border border-gray-200 hover:border-orange-300 text-gray-600 text-sm py-2 rounded-lg transition-colors">
-                            Email
-                        </a>
-                        @endif
+
+                        <div class="d-flex gap-2">
+                            @if($product->entity->phone)
+                            <a href="tel:{{ $product->entity->phone }}" class="btn btn-outline-secondary flex-fill">Telefone</a>
+                            @endif
+                            @if($product->entity->email)
+                            <a href="mailto:{{ $product->entity->email }}" class="btn btn-outline-secondary flex-fill">Email</a>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="pt-4 border-t border-gray-100">
-                <h2 class="font-semibold text-sm text-gray-700 mb-3 uppercase tracking-wider">Partilhar</h2>
-                <div class="flex items-center gap-3">
+            <div class="pt-3 border-top">
+                <h2 class="fw-semibold small text-muted mb-3 text-uppercase" style="letter-spacing:.05em;">Partilhar</h2>
+                <div class="d-flex align-items-center gap-2">
                     <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(url()->current()) }}" target="_blank"
-                        class="flex-1 text-center py-2 rounded-lg border border-gray-200 text-gray-600 hover:border-orange-300 text-sm transition-colors">
-                        Facebook
-                    </a>
+                        class="btn btn-outline-secondary flex-fill">Facebook</a>
                     <a href="https://api.whatsapp.com/send?text={{ urlencode($product->name . ' - ' . url()->current()) }}" target="_blank"
-                        class="flex-1 text-center py-2 rounded-lg bg-green-500 text-white text-sm hover:bg-green-600 transition-colors">
-                        WhatsApp
-                    </a>
-                    <button onclick="navigator.clipboard.writeText(window.location.href)"
-                        class="flex-1 text-center py-2 rounded-lg border border-gray-200 text-gray-600 hover:border-orange-300 text-sm transition-colors">
-                        Copiar link
-                    </button>
+                        class="btn btn-success flex-fill">WhatsApp</a>
+                    <button onclick="navigator.clipboard.writeText(window.location.href)" class="btn btn-outline-secondary flex-fill">Copiar link</button>
                 </div>
             </div>
         </div>
@@ -195,33 +171,30 @@ $ogImg = $primaryImg
 
     {{-- Secções extras --}}
     @if($moreFromEntity->count() > 0)
-    <section class="mt-16 pt-8 border-t">
-        <h2 class="text-xl font-bold text-gray-800 mb-6">
-            Mais produtos de <span class="text-orange-600">{{ $product->entity->name }}</span>
+    <section class="mt-5 pt-4 border-top">
+        <h2 class="fs-4 fw-bold mb-4">
+            Mais produtos de <span class="text-primary">{{ $product->entity->name }}</span>
         </h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="row row-cols-2 row-cols-md-4 g-3">
             @foreach($moreFromEntity as $related)
-            <x-product-card :product="$related" />
+            <div class="col"><x-product-card :product="$related" /></div>
             @endforeach
         </div>
-        <div class="text-center mt-8">
+        <div class="text-center mt-4">
             <a href="{{ route('entity.show', $product->entity->slug) }}"
-                class="inline-flex items-center gap-2 text-orange-600 hover:text-orange-700 text-sm font-bold uppercase tracking-wider transition-colors">
-                Ver loja completa
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
+                class="d-inline-flex align-items-center gap-2 link-primary small fw-bold text-uppercase text-decoration-none" style="letter-spacing:.05em;">
+                Ver loja completa <i class="bi bi-arrow-right"></i>
             </a>
         </div>
     </section>
     @endif
 
     @if($similarProducts->count() > 0)
-    <section class="mt-16 pt-8 border-t">
-        <h2 class="text-xl font-bold text-gray-800 mb-6">Produtos Semelhantes</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <section class="mt-5 pt-4 border-top">
+        <h2 class="fs-4 fw-bold mb-4">Produtos Semelhantes</h2>
+        <div class="row row-cols-2 row-cols-md-4 g-3">
             @foreach($similarProducts as $similar)
-            <x-product-card :product="$similar" />
+            <div class="col"><x-product-card :product="$similar" /></div>
             @endforeach
         </div>
     </section>

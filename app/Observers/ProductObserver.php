@@ -3,10 +3,22 @@
 namespace App\Observers;
 
 use App\Models\Product;
+use App\Services\ImageUploadService;
 use Illuminate\Support\Facades\DB;
 
 class ProductObserver
 {
+    public function __construct(private ImageUploadService $images) {}
+
+    public function deleting(Product $product): void
+    {
+        $product->loadMissing('images');
+        $this->images->deleteMany([
+            $product->image_path,
+            ...$product->images->pluck('path')->all(),
+        ]);
+    }
+
     public function created(Product $product): void
     {
         if ($product->is_active) {

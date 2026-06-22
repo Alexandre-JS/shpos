@@ -53,17 +53,40 @@ class ImageUploadService
 
     public function delete(?string $publicPath): void
     {
-        if (!$publicPath) return;
-        $relative = str_replace('storage/', '', $publicPath);
+        if (!$publicPath) {
+            return;
+        }
+
         $disk = Storage::disk('public');
-        if ($disk->exists($relative)) {
-            $disk->delete($relative);
+
+        foreach ($this->variantPaths($publicPath) as $path) {
+            if ($disk->exists($path)) {
+                $disk->delete($path);
+            }
         }
+    }
+
+    public function deleteMany(iterable $publicPaths): void
+    {
+        foreach (array_unique(array_filter([...$publicPaths])) as $path) {
+            $this->delete($path);
+        }
+    }
+
+    public function variantPaths(string $publicPath): array
+    {
+        $relative = ltrim($publicPath, '/');
+        $relative = preg_replace('#^storage/#', '', $relative);
         $info = pathinfo($relative);
-        $small = $info['dirname'] . '/' . $info['filename'] . '_sm.' . ($info['extension'] ?? 'jpg');
-        if ($disk->exists($small)) {
-            $disk->delete($small);
-        }
+        $directory = isset($info['dirname']) && $info['dirname'] !== '.' ? $info['dirname'] . '/' : '';
+        $extension = $info['extension'] ?? 'jpg';
+        $base = preg_replace('/_(?:lg|sm)$/', '', $info['filename']);
+
+        return [
+            $directory . $base . '.' . $extension,
+            $directory . $base . '_lg.' . $extension,
+            $directory . $base . '_sm.' . $extension,
+        ];
     }
 
     protected function resizeAndCanvas(string $absolutePath, int $targetW, int $targetH, bool $preventUpscale = false): void

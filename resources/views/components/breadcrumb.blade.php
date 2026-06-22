@@ -1,19 +1,14 @@
 @props([
-    'items' => [], // [['label' => 'Home', 'url' => route('home')], ...]
+    'items' => [],
 ])
-<nav class="text-xs text-gray-500" aria-label="Breadcrumb">
-    <ol class="flex flex-wrap items-center gap-1">
+<nav class="small text-muted" aria-label="Breadcrumb">
+    <ol class="breadcrumb mb-0">
         @foreach ($items as $i => $item)
-            <li class="flex items-center gap-1">
-                @if (!empty($item['url']) && $i < count($items) - 1)
-                    <a href="{{ $item['url'] }}" class="hover:text-gray-700 hover:underline">{{ $item['label'] }}</a>
-                @else
-                    <span class="text-gray-400">{{ $item['label'] }}</span>
-                @endif
-                @if ($i < count($items) - 1)
-                    <span class="text-gray-400">›</span>
-                @endif
-            </li>
+            @if (!empty($item['url']) && $i < count($items) - 1)
+                <li class="breadcrumb-item"><a href="{{ $item['url'] }}" class="link-secondary text-decoration-none">{{ $item['label'] }}</a></li>
+            @else
+                <li class="breadcrumb-item active text-truncate" style="max-width:180px;" aria-current="page">{{ $item['label'] }}</li>
+            @endif
         @endforeach
     </ol>
 </nav>

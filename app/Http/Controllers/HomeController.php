@@ -20,18 +20,9 @@ class HomeController extends Controller
         }
 
         $recent = $this->productService->getRecent();
-        $discounted = Product::with(['entity', 'category'])
-            ->active()
-            ->withActiveDiscount()
-            ->orderByDesc('discount_ends_at')
-            ->limit(12)
-            ->get();
-        $mostViewed = $this->productService->getMostViewed();
-        $products = $this->productService->paginateAll();
-
         $categories = \App\Models\Category::active()
             ->withCount(['products as items_count' => function ($q) {
-                $q->active();
+                $q->publiclyVisible();
             }])
             ->orderByDesc('items_count')
             ->orderBy('name')
@@ -39,22 +30,19 @@ class HomeController extends Controller
 
         $entities = \App\Models\Entity::active()
             ->withCount(['products as items_count' => function ($q) {
-                $q->active();
+                $q->publiclyVisible();
             }])
             ->orderByDesc('items_count')
             ->orderBy('name')
             ->limit(30)
             ->get();
 
-        $totalProducts = Product::active()->count();
-        $totalEntities = \App\Models\Entity::active()->count();
-
-        return view('home.index', compact('recent', 'discounted', 'mostViewed', 'products', 'categories', 'entities', 'totalProducts', 'totalEntities'));
+        return view('home.index', compact('recent', 'categories', 'entities'));
     }
 
     public function products()
     {
-        $query = Product::with(['entity', 'category'])->active()->products();
+        $query = Product::with(['entity', 'category', 'images'])->publiclyVisible()->products();
         if (request()->boolean('promo')) {
             $query->withActiveDiscount();
         }
@@ -71,7 +59,7 @@ class HomeController extends Controller
 
     public function services()
     {
-        $query = Product::with(['entity', 'category'])->active()->services();
+        $query = Product::with(['entity', 'category', 'images'])->publiclyVisible()->services();
         if (request()->boolean('promo')) {
             $query->withActiveDiscount();
         }
@@ -116,7 +104,7 @@ class HomeController extends Controller
                         ],
                         'category' => $p->category?->name,
                         'views' => $p->views_count,
-                        'url' => route('product.show', $p->slug),
+                        'url' => route('product.show', $p->publicRouteParameters()),
                     ];
                 }),
                 'count' => $results->count(),
@@ -143,7 +131,7 @@ class HomeController extends Controller
     {
         $categories = \App\Models\Category::active()
             ->withCount(['products as items_count' => function ($q) {
-                $q->active();
+                $q->publiclyVisible();
             }])
             ->orderByDesc('items_count')->orderBy('name')->get();
         $entities = \App\Models\Entity::active()

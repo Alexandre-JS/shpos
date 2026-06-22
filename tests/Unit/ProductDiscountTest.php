@@ -4,13 +4,14 @@ namespace Tests\Unit;
 
 use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ProductDiscountTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function percent_discount_calculations_are_correct()
     {
         $p = Product::factory()->create([
@@ -27,7 +28,7 @@ class ProductDiscountTest extends TestCase
         $this->assertEquals(25.00, $p->discountPercent());
     }
 
-    /** @test */
+    #[Test]
     public function amount_discount_calculations_are_correct()
     {
         $p = Product::factory()->create([
@@ -44,7 +45,7 @@ class ProductDiscountTest extends TestCase
         $this->assertEquals(12.5, $p->discountPercent());
     }
 
-    /** @test */
+    #[Test]
     public function discount_not_active_outside_window()
     {
         $p = Product::factory()->create([
@@ -60,7 +61,7 @@ class ProductDiscountTest extends TestCase
         $this->assertEquals(50.00, $p->discountedPrice());
     }
 
-    /** @test */
+    #[Test]
     public function expired_discount_is_inactive()
     {
         $p = Product::factory()->create([
@@ -74,7 +75,7 @@ class ProductDiscountTest extends TestCase
         $this->assertFalse($p->isDiscountActive());
     }
 
-    /** @test */
+    #[Test]
     public function amount_discount_cannot_exceed_price()
     {
         $p = Product::factory()->create([

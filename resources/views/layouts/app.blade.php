@@ -30,166 +30,165 @@
     <meta name="twitter:description" content="{{ $metaDesc }}" />
     <meta name="twitter:image" content="{{ $ogImage }}" />
 
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700,800" rel="stylesheet" />
+
     @stack('meta')
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/scss/app.scss', 'resources/js/app.js'])
     @stack('preload')
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
-<body class="min-h-screen flex flex-col text-gray-800" style="background:#FFFFFF">
+<body class="d-flex min-vh-100 flex-column">
 
-    {{-- ── Navbar principal (Compacta) ─────────────────────────────────────────── --}}
-    <header x-data="{ open: false }" style="background:#FFFFFF" class="sticky top-0 z-50 shadow-sm border-b border-gray-100">
-        <div class="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between gap-8">
+    <header class="site-header shadow-sm">
+        <div class="app-container d-flex align-items-center justify-content-between gap-4 py-2">
             {{-- Logo --}}
-            <a href="{{ route('home') }}" class="shrink-0 transition-opacity hover:opacity-90">
-                <img src="{{ asset('images/logo.svg') }}" alt="{{ config('app.name') }} — Vitrine Digital de Moçambique" class="h-14 w-auto">
+            <a href="{{ route('home') }}" class="flex-shrink-0" aria-label="Página inicial">
+                <img src="{{ asset('images/logo.svg') }}" alt="{{ config('app.name') }}" style="height:3rem;width:auto;">
             </a>
 
-            {{-- Central Large Search --}}
-            <div class="flex-1 hidden md:block max-w-2xl">
-                <div class="relative group">
-                    <x-search-bar live="true" />
-                </div>
+            {{-- Pesquisa central --}}
+            <div class="flex-grow-1 d-none d-md-block" style="max-width:42rem;">
+                <x-search-bar live="true" />
             </div>
 
-            {{-- Right Actions --}}
-            <div class="flex items-center gap-4 text-sm font-semibold shrink-0">
+            {{-- Ações de conta (desktop) --}}
+            <div class="d-none d-md-flex align-items-center gap-3 flex-shrink-0 fw-semibold small">
                 @auth
-                <a href="{{ route('dashboard.index') }}" class="text-gray-600 hover:text-orange-600 transition-colors">Dashboard</a>
-                <form action="{{ route('logout') }}" method="POST" class="inline">
+                <a href="{{ Auth::user()->is_admin ? route('admin.dashboard') : route('dashboard.index') }}" class="text-secondary-emphasis text-decoration-none">Painel</a>
+                <form action="{{ route('logout') }}" method="POST" class="d-inline m-0">
                     @csrf
-                    <button class="text-gray-400 hover:text-red-500 transition-colors">Sair</button>
+                    <button type="submit" class="btn btn-link p-0 text-muted text-decoration-none">Sair</button>
                 </form>
                 @else
-                <a href="{{ route('login.show') }}" class="text-gray-600 hover:text-orange-500 transition-colors">Entrar</a>
-                <a href="{{ route('register.show') }}"
-                    class="px-5 py-2 rounded-xl text-sm font-bold border-2 border-orange-500 text-orange-600 hover:bg-orange-500 hover:text-white transition-all">
-                    Criar Loja
-                </a>
+                <a href="{{ route('login.show') }}" class="text-secondary-emphasis text-decoration-none">Entrar</a>
+                <a href="{{ route('register.show') }}" class="btn btn-primary fw-bold rounded-3 px-3">Criar Loja</a>
                 @endauth
-
-                {{-- Mobile Toggle --}}
-                <button class="md:hidden p-2 text-gray-500" @click="open=!open">
-                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
-                        <path x-show="!open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path x-show="open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
             </div>
+
+            {{-- Toggler mobile --}}
+            <button class="btn btn-light d-md-none rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#mobileNavigation" aria-controls="mobileNavigation" aria-expanded="false" aria-label="Abrir menu">
+                <i class="bi bi-list fs-4"></i>
+            </button>
         </div>
 
-        {{-- Row 2: Categorias horizontal (Desktop) --}}
-        <div class="hidden md:block border-t border-gray-100 bg-white" x-data="{ openAllCats: false }">
-            <div class="max-w-7xl mx-auto px-4 relative">
-                <nav class="flex items-center justify-between py-1.5">
-                    <div class="flex items-center gap-1">
-                        <a href="{{ route('products') }}"
-                            class="px-4 py-2 text-[11px] font-bold text-orange-600 bg-orange-50 rounded-lg whitespace-nowrap transition-all tracking-wide">
-                            Todos
-                        </a>
+        {{-- Navegação desktop --}}
+        <div class="d-none d-md-block border-top bg-white">
+            <div class="app-container">
+                <nav class="navbar navbar-expand p-0" aria-label="Navegação principal">
+                    <ul class="navbar-nav align-items-center gap-1 py-1">
+                        <li class="nav-item"><a href="{{ route('products') }}" class="nav-link nav-link-soft px-3 py-2 small {{ request()->routeIs('products') ? 'active' : '' }}">Produtos</a></li>
+                        <li class="nav-item"><a href="{{ route('services') }}" class="nav-link nav-link-soft px-3 py-2 small {{ request()->routeIs('services') ? 'active' : '' }}">Serviços</a></li>
+                        <li class="nav-item"><a href="{{ route('entities.index') }}" class="nav-link nav-link-soft px-3 py-2 small {{ request()->routeIs('entities.*') ? 'active' : '' }}">Lojas</a></li>
 
-                        @foreach($globalCategories->take(5) as $cat)
-                        <a href="{{ route('category.show', $cat->slug) }}"
-                            class="px-4 py-2 text-[11px] font-bold text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg whitespace-nowrap transition-all tracking-wide">
-                            {{ $cat->name }}
-                        </a>
-                        @endforeach
-
-                        @if($globalCategories->count() > 5)
-                        <button @click="openAllCats = !openAllCats"
-                            class="px-4 py-2 text-[11px] font-bold text-orange-600 hover:bg-orange-600 hover:text-white rounded-lg whitespace-nowrap tracking-wide flex items-center gap-2 transition-all shadow-sm">
-                            <span>Mais Categorias</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 transition-transform" :class="openAllCats ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
+                        @if($globalCategories->isNotEmpty())
+                        <li class="vr mx-2 my-1"></li>
+                        <li class="nav-item dropdown">
+                            <button class="nav-link nav-link-soft px-3 py-2 small dropdown-toggle border-0 bg-transparent" data-bs-toggle="dropdown" aria-expanded="false">
+                                Categorias
+                            </button>
+                            <div class="dropdown-menu p-3 shadow-lg border-0 rounded-4" style="width:min(40rem,calc(100vw - 2rem));">
+                                <div class="row row-cols-2 row-cols-md-4 g-2">
+                                    @foreach($globalCategories->take(8) as $cat)
+                                    <div class="col">
+                                        <a href="{{ route('category.show', $cat->slug) }}" class="dropdown-item rounded-3 py-2 text-truncate">{{ $cat->name }}</a>
+                                    </div>
+                                    @endforeach
+                                </div>
+                                <div class="dropdown-divider"></div>
+                                <a href="{{ route('categories.index') }}" class="dropdown-item rounded-3 py-2 d-flex align-items-center justify-content-between fw-semibold text-primary">
+                                    Ver todas as categorias <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        </li>
                         @endif
-                    </div>
+                    </ul>
                 </nav>
-
-                {{-- Dropdown de Categorias Completo --}}
-                <div x-show="openAllCats"
-                    x-cloak
-                    x-transition:enter="transition ease-out duration-200"
-                    x-transition:enter-start="opacity-0 translate-y-1"
-                    x-transition:enter-end="opacity-100 translate-y-0"
-                    x-transition:leave="transition ease-in duration-150"
-                    x-transition:leave-start="opacity-100 translate-y-0"
-                    x-transition:leave-end="opacity-0 translate-y-1"
-                    @click.away="openAllCats = false"
-                    class="absolute left-4 right-4 top-full bg-white border border-gray-100 shadow-2xl rounded-2xl z-50 p-6 grid grid-cols-4 gap-4 mt-1">
-                    <div class="col-span-4 mb-2 pb-2 border-b border-gray-50 flex items-center justify-between">
-                        <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-orange-600">Todas as Categorias</h3>
-                        <a href="{{ route('products') }}" class="text-[10px] font-bold text-gray-400 hover:text-orange-600 uppercase tracking-widest transition-colors">Ver Tudo →</a>
-                    </div>
-                    @foreach($globalCategories as $cat)
-                    <a href="{{ route('category.show', $cat->slug) }}" class="flex items-center gap-3 group">
-                        <span class="w-1.5 h-1.5 rounded-full bg-orange-100 group-hover:bg-orange-500 transition-colors"></span>
-                        <span class="text-sm text-gray-600 group-hover:text-orange-600 transition-colors font-medium">{{ $cat->name }}</span>
-                    </a>
-                    @endforeach
-                </div>
             </div>
         </div>
 
-        {{-- Mobile panel --}}
-        <div x-show="open" x-cloak class="md:hidden border-t border-gray-100 bg-white">
-            <div class="px-4 py-3 space-y-3">
+        {{-- Navegação mobile --}}
+        <div id="mobileNavigation" class="collapse d-md-none border-top bg-white">
+            <div class="p-3 vstack gap-3">
                 <x-search-bar live="true" />
 
-                {{-- Mobile Categories --}}
-                <div class="py-2">
-                    <p class="text-[10px] font-black uppercase text-gray-400 mb-2 px-2">Categorias</p>
-                    <div class="grid grid-cols-2 gap-1">
-                        <a href="{{ route('products') }}" class="text-orange-600 font-bold py-2 px-2 text-xs bg-orange-50 rounded-lg">Ver Tudo</a>
-                        @foreach($globalCategories->take(5) as $cat)
-                        <a href="{{ route('category.show', $cat->slug) }}" class="text-gray-600 py-2 px-2 text-xs hover:bg-orange-50 rounded-lg">{{ $cat->name }}</a>
+                <nav class="row row-cols-3 g-2" aria-label="Navegação principal">
+                    <div class="col"><a href="{{ route('products') }}" class="d-block text-center bg-light rounded-3 px-2 py-3 small fw-semibold text-body text-decoration-none">Produtos</a></div>
+                    <div class="col"><a href="{{ route('services') }}" class="d-block text-center bg-light rounded-3 px-2 py-3 small fw-semibold text-body text-decoration-none">Serviços</a></div>
+                    <div class="col"><a href="{{ route('entities.index') }}" class="d-block text-center bg-light rounded-3 px-2 py-3 small fw-semibold text-body text-decoration-none">Lojas</a></div>
+                </nav>
+
+                @if($globalCategories->isNotEmpty())
+                <div>
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <p class="mb-0 text-uppercase fw-bold text-muted" style="font-size:.625rem;letter-spacing:.16em;">Categorias</p>
+                        <a href="{{ route('categories.index') }}" class="small fw-semibold link-primary text-decoration-none">Ver todas</a>
+                    </div>
+                    <div class="row row-cols-2 g-1">
+                        @foreach($globalCategories->take(6) as $cat)
+                        <div class="col"><a href="{{ route('category.show', $cat->slug) }}" class="d-block text-truncate rounded-2 px-3 py-2 small text-secondary-emphasis text-decoration-none">{{ $cat->name }}</a></div>
                         @endforeach
                     </div>
                 </div>
+                @endif
 
-                <nav class="flex flex-col space-y-2 pb-2 border-t border-gray-50 pt-2">
-                    <a href="{{ route('products') }}" class="text-gray-600 py-2">Todos os Produtos</a>
-                    <a href="{{ route('entities.index') }}" class="text-gray-600 py-2">Lojas</a>
-                    <a href="{{ route('login.show') }}" class="text-gray-600 py-2">Entrar</a>
-                    <a href="{{ route('register.show') }}" class="text-orange-600 font-bold py-2">Criar Loja</a>
-                </nav>
+                <div class="d-flex align-items-center gap-2 border-top pt-3">
+                    @auth
+                    <a href="{{ Auth::user()->is_admin ? route('admin.dashboard') : route('dashboard.index') }}" class="btn btn-primary fw-bold flex-fill rounded-3">Painel</a>
+                    <form action="{{ route('logout') }}" method="POST" class="m-0">
+                        @csrf
+                        <button type="submit" class="btn btn-link text-muted fw-semibold text-decoration-none">Sair</button>
+                    </form>
+                    @else
+                    <a href="{{ route('login.show') }}" class="btn btn-outline-secondary flex-fill rounded-3">Entrar</a>
+                    <a href="{{ route('register.show') }}" class="btn btn-primary fw-bold flex-fill rounded-3">Criar Loja</a>
+                    @endauth
+                </div>
             </div>
         </div>
     </header>
 
     {{-- Flash messages --}}
-    <div class="max-w-7xl mx-auto w-full px-4 mt-4">
+    @if (session('success') || session('info') || session('warning') || session('error'))
+    <div class="app-container mt-4 vstack gap-2">
         @if (session('success'))
-        <div class="mb-3 bg-green-100 text-green-700 p-3 rounded text-sm">{{ session('success') }}</div>
+        <div class="alert alert-success small mb-0">{{ session('success') }}</div>
         @endif
         @if (session('info'))
-        <div class="mb-3 bg-blue-50 border border-blue-200 text-blue-800 p-3 rounded text-sm">{{ session('info') }}</div>
+        <div class="alert alert-info small mb-0">{{ session('info') }}</div>
         @endif
         @if (session('warning'))
-        <div class="mb-3 bg-yellow-50 border border-yellow-200 text-yellow-800 p-3 rounded text-sm">{{ session('warning') }}</div>
+        <div class="alert alert-warning small mb-0">{{ session('warning') }}</div>
         @endif
         @if (session('error'))
-        <div class="mb-3 bg-red-100 text-red-700 p-3 rounded text-sm">{{ session('error') }}</div>
+        <div class="alert alert-danger small mb-0">{{ session('error') }}</div>
         @endif
     </div>
+    @endif
 
-    <main class="flex-1">
+    <main class="flex-grow-1">
         @yield('content')
     </main>
 
-    <footer class="mt-16 border-t py-8 text-xs text-gray-400" style="background:#FFFFFF">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p>&copy; {{ date('Y') }} Shops. Todos os direitos reservados.</p>
-            <nav class="flex flex-wrap gap-x-5 gap-y-1 justify-center">
-                <a href="{{ route('about') }}" class="hover:text-orange-600 transition-colors">Sobre</a>
-                <a href="{{ route('delivery-partners') }}" class="hover:text-orange-600 transition-colors">Parceiros de Entrega</a>
-                <a href="{{ route('contact') }}" class="hover:text-orange-600 transition-colors">Contacto</a>
-                <a href="{{ route('terms') }}" class="hover:text-orange-600 transition-colors">Termos de Uso</a>
-                <a href="{{ route('privacy') }}" class="hover:text-orange-600 transition-colors">Privacidade</a>
-                <a href="mailto:suporte@shops.co.mz" class="hover:text-orange-600 transition-colors">suporte@shops.co.mz</a>
-            </nav>
+    <footer class="mt-5 border-top bg-white">
+        <div class="app-container py-4">
+            <div class="d-flex flex-column flex-md-row gap-4 align-items-md-center justify-content-md-between">
+                <div class="d-flex align-items-center gap-3">
+                    <img src="{{ asset('images/logo.svg') }}" alt="{{ config('app.name') }}" style="height:2.5rem;width:auto;">
+                    <p class="d-none d-sm-block mb-0 text-muted small" style="max-width:20rem;">Produtos e lojas moçambicanas num só lugar.</p>
+                </div>
+                <nav class="d-flex flex-wrap column-gap-4 row-gap-2 small text-muted" aria-label="Informação institucional">
+                    <a href="{{ route('about') }}" class="link-secondary text-decoration-none">Sobre</a>
+                    <a href="{{ route('delivery-partners') }}" class="link-secondary text-decoration-none">Entregas</a>
+                    <a href="{{ route('contact') }}" class="link-secondary text-decoration-none">Contacto</a>
+                    <a href="{{ route('terms') }}" class="link-secondary text-decoration-none">Termos</a>
+                    <a href="{{ route('privacy') }}" class="link-secondary text-decoration-none">Privacidade</a>
+                </nav>
+            </div>
+            <div class="mt-4 border-top pt-3">
+                <p class="mb-0 text-muted" style="font-size:.6875rem;">&copy; {{ date('Y') }} {{ config('app.name') }}. Todos os direitos reservados.</p>
+            </div>
         </div>
     </footer>
 

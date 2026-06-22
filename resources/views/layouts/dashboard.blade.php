@@ -5,93 +5,79 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@yield('title', 'Dashboard') - Vitrine</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/scss/app.scss', 'resources/js/app.js'])
     @stack('head')
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
 </head>
 
-<body x-data="{ open: false }" class="text-gray-800 min-h-screen flex" style="background:#F8F9FF">
-    <div x-show="open" x-transition.opacity x-cloak @click="open=false" class="fixed inset-0 bg-black/40 z-30 md:hidden"></div>
+<body class="text-body min-vh-100 d-flex" style="background:#F8F9FF">
 
-    <aside class="fixed md:static inset-y-0 left-0 z-40 w-64 flex flex-col transform md:transform-none transition-transform duration-200 border-r"
-           style="background:#1E1B4B"
-           :class="{ '-translate-x-full md:translate-x-0': !open, 'translate-x-0': open }">
+    <aside class="offcanvas-md offcanvas-start app-sidebar d-flex flex-column" tabindex="-1" id="dashSidebar">
 
-        <div class="px-5 py-4 border-b border-indigo-800 flex items-center justify-between">
-            <div>
-                <a href="{{ route('home') }}" class="font-bold text-lg text-white tracking-tight">
-                    {{ config('app.name', 'Vitrine') }}
+        @php $dashEntity = auth()->user()?->entity; @endphp
+        <div class="px-4 py-3 border-bottom d-flex align-items-center justify-content-between gap-2">
+            <div class="min-w-0">
+                <a href="{{ route('dashboard.index') }}" class="fw-bold fs-6 text-body text-decoration-none d-block text-truncate" title="{{ $dashEntity?->name }}">
+                    {{ $dashEntity?->name ?? config('app.name', 'Vitrine') }}
                 </a>
-                <p class="text-xs mt-0.5" style="color:#a5b4fc">Painel da Loja</p>
+                <p class="mb-0 small text-muted">Painel da Loja</p>
             </div>
-            <button class="md:hidden w-8 h-8 flex items-center justify-center rounded text-indigo-300 hover:bg-indigo-800"
-                    @click="open=false">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
+            <button class="btn-close d-md-none flex-shrink-0" type="button" data-bs-dismiss="offcanvas" data-bs-target="#dashSidebar" aria-label="Fechar"></button>
         </div>
 
-        <nav class="flex-1 overflow-y-auto thin-scrollbar px-2 py-4 text-sm space-y-0.5">
-            @php
-                $navItem = fn($route, $label, $icon, $yield) =>
-                    '<a href="'.route($route).'" class="flex items-center gap-2.5 px-3 py-2 rounded transition-colors text-indigo-200 hover:bg-indigo-800 hover:text-white '.($__env->yieldContent($yield)).'">'
-                    .$icon.'<span>'.$label.'</span></a>';
-            @endphp
-
-            <a href="{{ route('dashboard.index') }}"
-               class="flex items-center gap-2.5 px-3 py-2 rounded transition-colors text-indigo-200 hover:bg-indigo-800 hover:text-white @yield('nav.dashboard')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6"/></svg>
-                <span>Visão Geral</span>
+        <nav class="flex-grow-1 overflow-auto thin-scrollbar px-2 py-3 small vstack gap-1">
+            <a href="{{ route('dashboard.index') }}" class="dash-link @yield('nav.dashboard')">
+                <i class="bi bi-grid-1x2"></i><span>Visão Geral</span>
             </a>
-            <a href="{{ route('dashboard.products.index') }}"
-               class="flex items-center gap-2.5 px-3 py-2 rounded transition-colors text-indigo-200 hover:bg-indigo-800 hover:text-white @yield('nav.products')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/></svg>
-                <span>Produtos / Serviços</span>
+            <a href="{{ route('dashboard.products.index') }}" class="dash-link @yield('nav.products')">
+                <i class="bi bi-box-seam"></i><span>Produtos / Serviços</span>
             </a>
-            <a href="{{ route('dashboard.entity.settings.edit') }}"
-               class="flex items-center gap-2.5 px-3 py-2 rounded transition-colors text-indigo-200 hover:bg-indigo-800 hover:text-white @yield('nav.entity')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1"/></svg>
-                <span>Minha Loja</span>
+            <a href="{{ route('dashboard.entity.settings.edit') }}" class="dash-link @yield('nav.entity')">
+                <i class="bi bi-shop"></i><span>Minha Loja</span>
             </a>
-            <a href="{{ route('dashboard.stats') }}"
-               class="flex items-center gap-2.5 px-3 py-2 rounded transition-colors text-indigo-200 hover:bg-indigo-800 hover:text-white @yield('nav.stats')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                <span>Estatísticas</span>
+            <a href="{{ route('dashboard.stats') }}" class="dash-link @yield('nav.stats')">
+                <i class="bi bi-bar-chart"></i><span>Estatísticas</span>
             </a>
         </nav>
 
-        <div class="p-3 border-t border-indigo-800 text-xs space-y-2">
-            <div class="text-indigo-300 truncate">{{ auth()->user()->name ?? '' }}</div>
-            <div class="flex gap-3">
-                <a href="{{ route('home') }}" class="text-indigo-300 hover:text-white">Ver loja</a>
-                <form method="POST" action="{{ route('logout') }}" class="inline">
+        <div class="p-3 border-top vstack gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light text-secondary flex-shrink-0" style="width:2rem;height:2rem;"><i class="bi bi-person"></i></span>
+                <div class="min-w-0">
+                    <p class="small fw-medium text-truncate mb-0">{{ auth()->user()->name ?? '' }}</p>
+                    <p class="text-muted text-truncate mb-0" style="font-size:.7rem;">{{ auth()->user()->email ?? '' }}</p>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                @if ($dashEntity)
+                    <a href="{{ route('entity.show', $dashEntity->slug) }}" target="_blank" class="btn btn-outline-secondary btn-sm flex-fill"><i class="bi bi-shop me-1"></i>Ver loja</a>
+                @endif
+                <form method="POST" action="{{ route('logout') }}" class="m-0">
                     @csrf
-                    <button class="text-red-400 hover:text-red-300">Sair</button>
+                    <button class="btn btn-outline-danger btn-sm" title="Terminar sessão"><i class="bi bi-box-arrow-right me-1"></i>Sair</button>
                 </form>
             </div>
         </div>
     </aside>
 
-    <div class="flex-1 flex flex-col min-h-screen">
-        <header class="bg-white border-b px-4 sm:px-6 py-3 flex items-center gap-4 shadow-sm">
-            <button class="md:hidden w-9 h-9 flex items-center justify-center rounded hover:bg-gray-100" @click="open=true">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
+    <div class="flex-grow-1 d-flex flex-column min-vh-100">
+        <header class="bg-white border-bottom px-3 px-sm-4 py-3 d-flex align-items-center gap-3 shadow-sm">
+            <button class="btn btn-light d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#dashSidebar" aria-controls="dashSidebar">
+                <i class="bi bi-list fs-5"></i>
             </button>
-            <div class="flex-1 flex items-center justify-between">
-                <h1 class="font-semibold text-lg">@yield('header', 'Dashboard')</h1>
-                <a href="{{ route('dashboard.products.create') }}" class="btn btn-accent btn-sm hidden sm:inline-flex">
+            <div class="flex-grow-1 d-flex align-items-center justify-content-between">
+                <h1 class="fw-semibold fs-5 mb-0">@yield('header', 'Dashboard')</h1>
+                <a href="{{ route('dashboard.products.create') }}" class="btn btn-secondary btn-sm d-none d-sm-inline-flex">
                     + Novo produto
                 </a>
             </div>
         </header>
 
-        <main class="flex-1 px-4 sm:px-6 py-6 space-y-6">
-            @foreach(['success' => 'alert-success', 'error' => 'alert-error', 'info' => 'alert-info', 'warning' => 'alert-warning'] as $type => $cls)
+        <main class="flex-grow-1 px-3 px-sm-4 py-4 vstack gap-4">
+            @foreach(['success' => 'alert-success', 'error' => 'alert-danger', 'info' => 'alert-info', 'warning' => 'alert-warning'] as $type => $cls)
                 @if(session($type))
-                    <div class="alert {{ $cls }}">{{ session($type) }}</div>
+                    <div class="alert {{ $cls }} mb-0">{{ session($type) }}</div>
                 @endif
             @endforeach
             @yield('content')

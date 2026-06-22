@@ -7,35 +7,52 @@
     @endif
 @endpush
 @section('content')
-    <x-app-container class="space-y-8">
-        <header class="space-y-4">
-            <div class="flex items-start gap-4">
+    <x-app-container class="py-4 vstack gap-4">
+
+        <x-breadcrumb :items="[
+            ['label' => 'Home', 'url' => route('home')],
+            ['label' => 'Lojas', 'url' => route('entities.index')],
+            ['label' => $entity->name],
+        ]" />
+
+        <header class="vstack gap-4">
+            <div class="d-flex align-items-start gap-4">
                 @if ($entity->logo_path)
-                    <div
-                        class="w-24 h-24 rounded border bg-white flex items-center justify-center overflow-hidden shadow-sm">
-                        <img src="/{{ $entity->logo_path }}" alt="{{ $entity->name }}" class="object-cover w-full h-full" />
+                    <div class="rounded-4 border bg-white d-flex align-items-center justify-content-center overflow-hidden shadow-sm flex-shrink-0" style="width:6rem;height:6rem;">
+                        <img src="/{{ $entity->logo_path }}" alt="{{ $entity->name }}" class="object-fit-cover w-100 h-100" />
                     </div>
                 @else
-                    <div
-                        class="w-24 h-24 rounded border bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center text-gray-400 text-xs font-medium select-none shadow-inner">
-                        SEM LOGO
+                    <div class="rounded-4 border border-warning-subtle d-flex align-items-center justify-content-center text-primary flex-shrink-0 shadow-sm" style="width:6rem;height:6rem;background:#fff7ed;">
+                        <i class="bi bi-shop fs-1"></i>
                     </div>
                 @endif
-                <div class="space-y-2 flex-1">
-                    <h1 class="text-3xl font-bold leading-tight">{{ $entity->name }}</h1>
-                    <p class="text-gray-600 text-sm">{{ $entity->location_city }} {{ $entity->location_district }}</p>
+                <div class="flex-grow-1 min-w-0">
+                    <h1 class="fs-2 fw-bold lh-sm mb-1">{{ $entity->name }}</h1>
+                    <p class="small text-muted d-flex align-items-center gap-1 mb-0">
+                        <i class="bi bi-geo-alt text-primary"></i>
+                        {{ $entity->location_city }}{{ $entity->location_district ? ', ' . $entity->location_district : '' }}
+                    </p>
                 </div>
             </div>
-            <p class="max-w-3xl text-gray-700 leading-relaxed">{{ $entity->description }}</p>
+
+            @if ($entity->description)
+                <p class="text-secondary-emphasis small lh-base mb-0" style="max-width:48rem;">{{ $entity->description }}</p>
+            @endif
+
             <x-contact-buttons :entity="$entity" />
-            <div class="pt-2">
+
+            <div class="pt-1">
                 <x-share-buttons :url="url()->current()" :title="$entity->name" />
             </div>
         </header>
 
         <section>
-            <h2 class="text-xl font-semibold mb-4">Produtos / Serviços</h2>
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <h2 class="fs-4 fw-bold mb-0">Produtos / Serviços</h2>
+                <div class="rounded-pill bg-primary" style="height:.25rem;width:2rem;"></div>
+            </div>
             @include('partials.product-grid', ['items' => $entity->products])
         </section>
+
     </x-app-container>
 @endsection

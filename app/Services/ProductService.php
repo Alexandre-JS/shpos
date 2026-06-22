@@ -10,9 +10,8 @@ class ProductService
 {
     public function getRecent(int $limit = 12): Collection
     {
-        return Product::with(['entity:id,name,slug,is_active', 'category:id,name,slug'])
-            ->active()
-            ->whereHas('entity', fn($q) => $q->active())
+        return Product::with(['entity:id,name,slug,is_active,status', 'category:id,name,slug', 'images'])
+            ->publiclyVisible()
             ->latest()
             ->limit($limit)
             ->get();
@@ -20,10 +19,9 @@ class ProductService
 
     public function getMostViewed(int $limit = 12, int $minViews = 5): Collection
     {
-        return Product::with(['entity:id,name,slug', 'category:id,name,slug'])
-            ->active()
+        return Product::with(['entity:id,name,slug,is_active,status', 'category:id,name,slug', 'images'])
+            ->publiclyVisible()
             ->where('views_count', '>=', $minViews)
-            ->whereHas('entity', fn($q) => $q->active())
             ->orderByDesc('views_count')
             ->limit($limit)
             ->get();
@@ -36,8 +34,8 @@ class ProductService
             return collect();
         }
 
-        $query = Product::with(['entity:id,name,slug', 'category:id,name,slug'])
-            ->active()
+        $query = Product::with(['entity:id,name,slug,is_active,status', 'category:id,name,slug', 'images'])
+            ->publiclyVisible()
             ->when(in_array($type, ['product', 'service']), fn($q) => $q->where('type', $type))
             ->when($categorySlug, fn($q) => $q->whereHas('category', fn($c) => $c->where('slug', $categorySlug)))
             ->where(function ($q) use ($term) {
@@ -53,8 +51,8 @@ class ProductService
 
     public function paginateAll(int $perPage = 24): LengthAwarePaginator
     {
-        return Product::with(['entity:id,name,slug,location_city', 'category:id,name,slug'])
-            ->active()
+        return Product::with(['entity:id,name,slug,location_city,is_active,status', 'category:id,name,slug', 'images'])
+            ->publiclyVisible()
             ->orderByDesc('created_at')
             ->paginate($perPage);
     }

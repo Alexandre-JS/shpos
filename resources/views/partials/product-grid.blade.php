@@ -1,9 +1,9 @@
-@php $gridCols = $gridCols ?? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'; @endphp
-<div class="grid {{ $gridCols }} gap-4">
+@php $gridCols = $gridCols ?? 'row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5'; @endphp
+<div class="row {{ $gridCols }} g-3">
     @forelse($items as $p)
-        <x-product-card :product="$p" />
+        <div class="col"><x-product-card :product="$p" /></div>
     @empty
-        <div class="col-span-full">
+        <div class="col-12">
             <x-empty icon="📦" title="Sem resultados"
                 subtitle="Tente ajustar os filtros ou busca para encontrar produtos." />
         </div>

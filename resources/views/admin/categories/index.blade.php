@@ -1,60 +1,55 @@
 @extends('layouts.admin')
 @section('title', 'Categorias')
 @section('header', 'Categorias')
-@section('nav.admin.categories', 'bg-gray-800 text-white')
+@section('nav.admin.categories', 'active')
 
 @section('content')
-<div class="flex justify-end">
-    <a href="{{ route('admin.categories.create') }}"
-       class="bg-gray-900 text-white text-sm px-4 py-2 rounded hover:bg-gray-700">
-        + Nova categoria
-    </a>
+<div class="d-flex justify-content-end">
+    <a href="{{ route('admin.categories.create') }}" class="btn btn-dark btn-sm">+ Nova categoria</a>
 </div>
 
-<div class="bg-white rounded border">
+<div class="card">
     @if($categories->isEmpty())
-        <p class="text-sm text-gray-400 p-6 text-center">Nenhuma categoria criada.</p>
+        <p class="small text-muted p-5 text-center mb-0">Nenhuma categoria criada.</p>
     @else
-        <div class="divide-y">
+        <ul class="list-group list-group-flush">
             @foreach($categories as $cat)
-                <div class="p-4 flex items-center gap-4">
-                    <div class="text-2xl w-8 text-center shrink-0">{{ $cat->icon ?? '—' }}</div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <p class="font-medium">{{ $cat->name }}</p>
-                            <span class="text-xs border rounded px-1.5 py-0.5 text-gray-500">
+                <li class="list-group-item p-4 d-flex align-items-center gap-3">
+                    <div class="fs-4 text-center flex-shrink-0" style="width:2rem;">{{ $cat->icon ?? '—' }}</div>
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <p class="fw-medium mb-0">{{ $cat->name }}</p>
+                            <span class="badge text-bg-light border text-muted" style="font-size:.625rem;">
                                 {{ ['product' => 'Produto', 'service' => 'Serviço', 'both' => 'Ambos'][$cat->type] }}
                             </span>
                             @if(!$cat->is_active)
-                                <span class="text-xs bg-gray-200 text-gray-500 rounded px-1.5 py-0.5">Inactiva</span>
+                                <span class="badge text-bg-secondary" style="font-size:.625rem;">Inactiva</span>
                             @endif
                         </div>
-                        <p class="text-xs text-gray-400 mt-0.5">{{ $cat->products_count }} produto(s) · slug: {{ $cat->slug }}</p>
+                        <p class="small text-muted mt-1 mb-0">{{ $cat->products_count }} produto(s) · slug: {{ $cat->slug }}</p>
                     </div>
-                    <div class="flex gap-2 shrink-0 text-xs">
-                        <a href="{{ route('admin.categories.edit', $cat) }}"
-                           class="border rounded px-3 py-1.5 hover:bg-gray-50">Editar</a>
+                    <div class="d-flex gap-2 flex-shrink-0">
+                        <a href="{{ route('admin.categories.edit', $cat) }}" class="btn btn-outline-secondary btn-sm">Editar</a>
 
-                        <form method="POST" action="{{ route('admin.categories.toggle', $cat) }}">
+                        <form method="POST" action="{{ route('admin.categories.toggle', $cat) }}" class="m-0">
                             @csrf @method('PUT')
-                            <button class="{{ $cat->is_active ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' : 'bg-blue-600 text-white hover:bg-blue-700' }} rounded px-3 py-1.5">
+                            <button class="btn btn-sm {{ $cat->is_active ? 'btn-outline-secondary' : 'btn-primary' }}">
                                 {{ $cat->is_active ? 'Desactivar' : 'Activar' }}
                             </button>
                         </form>
 
-                        <form method="POST" action="{{ route('admin.categories.destroy', $cat) }}">
+                        <form method="POST" action="{{ route('admin.categories.destroy', $cat) }}" class="m-0">
                             @csrf @method('DELETE')
-                            <button class="bg-red-600 text-white rounded px-3 py-1.5 hover:bg-red-700
-                                {{ $cat->products_count > 0 ? 'opacity-40 cursor-not-allowed' : '' }}"
+                            <button class="btn btn-danger btn-sm {{ $cat->products_count > 0 ? 'disabled' : '' }}"
                                 {{ $cat->products_count > 0 ? 'disabled' : '' }}
                                 onclick="{{ $cat->products_count > 0 ? 'return false' : "return confirm('Eliminar «{$cat->name}»?')" }}">
                                 Eliminar
                             </button>
                         </form>
                     </div>
-                </div>
+                </li>
             @endforeach
-        </div>
+        </ul>
     @endif
 </div>
 @endsection
